@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<robot name="TestKinect" xmlns:xacro="http://ros.org/wiki/xacro">
+	<link name="world"/>
+  <xacro:include filename="$(find irb120_robotiq85_gazebo)/urdf/kinect_main.urdf.xacro" />
+  <xacro:sensor_kinect parent="world"/>
+</robot>
+

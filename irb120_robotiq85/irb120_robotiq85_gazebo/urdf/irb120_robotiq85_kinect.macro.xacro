@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="irb120_robotiq85_kinect" >
+
+	<xacro:arg name="limited" default="true"/>
+
+	<!-- ABB IRB120 from ROS-i repos -->
+	<xacro:include filename="$(find abb_irb120_gazebo)/urdf/irb120_3_58.xacro" />
+	
+	<!-- Robotiq 85 -->
+	<xacro:include filename="$(find robotiq_85_description)/urdf/robotiq_85_gripper.urdf.xacro" />
+	<xacro:robotiq_85_gripper prefix="" parent="tool0">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	</xacro:robotiq_85_gripper>
+
+	<!-- Kinect Camera -->
+	<xacro:include filename="$(find irb120_robotiq85_gazebo)/urdf/kinect_main.urdf.xacro" />
+        <xacro:sensor_kinect parent="world"/>
+</robot>

@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: irb120_camara_diego
+    relative_path: urdf/irb120_robotiq85_macro.xacro
+    xacro_args: "--inorder "
+  SRDF:
+    relative_path: config/irb120_robotiq85.srdf
+  CONFIG:
+    author_name: Diego Martín
+    author_email: diego.martin.martin@urjc.es
+    generated_timestamp: 1582043294
