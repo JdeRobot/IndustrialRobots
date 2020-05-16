@@ -20,3 +20,11 @@ arm_controller:
   state_publish_rate:  25
   action_monitor_rate: 10
  
+# Tune the pid parameters if want to use pid controller
+# gazebo_ros_control/pid_gains:
+#   joint_1: {p: 1.0, i: 0.0, d: 0.0}
+#   joint_2: {p: 1.0, i: 0.0, d: 0.0}
+#   joint_3: {p: 1.0, i: 0.0, d: 0.0}
+#   joint_4: {p: 1.0, i: 0.0, d: 0.0}
+#   joint_5: {p: 1.0, i: 0.0, d: 0.0}
+#   joint_6: {p: 1.0, i: 0.0, d: 0.0}

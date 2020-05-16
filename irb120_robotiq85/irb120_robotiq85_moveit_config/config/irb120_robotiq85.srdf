@@ -10,13 +10,13 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="irb_120">
-        <joint name="joint_1" />
+        <!-- <joint name="joint_1" />
         <joint name="joint_2" />
         <joint name="joint_3" />
         <joint name="joint_4" />
         <joint name="joint_5" />
-        <joint name="joint_6" />
-        <joint name="joint6-tool0" />
+        <joint name="joint_6" /> -->
+        <chain base_link="base_link" tip_link="tool0" />
     </group>
     <group name="robotiq_85">
         <joint name="gripper_base_joint" />
@@ -39,7 +39,13 @@
         <joint name="gripper_finger2_joint" value="0" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="robotiq_85" parent_link="gripper_base_link" group="robotiq_85"/>
+    <end_effector name="robotiq_85" parent_link="tool0" group="robotiq_85"/>
+    <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
+    <passive_joint name="gripper_finger1_inner_knuckle_joint" />
+    <passive_joint name="gripper_finger1_finger_tip_joint" />
+    <passive_joint name="gripper_finger2_inner_knuckle_joint" />
+    <passive_joint name="gripper_finger2_finger_tip_joint" />
+    <passive_joint name="gripper_finger2_joint" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="link_1" reason="Adjacent" />
     <disable_collisions link1="base_link" link2="link_2" reason="Never" />
@@ -52,6 +58,7 @@
     <disable_collisions link1="gripper_base_link" link2="gripper_finger2_inner_knuckle_link" reason="Adjacent" />
     <disable_collisions link1="gripper_base_link" link2="gripper_finger2_knuckle_link" reason="Adjacent" />
     <disable_collisions link1="gripper_base_link" link2="link_3" reason="Never" />
+    <disable_collisions link1="gripper_base_link" link2="link_4" reason="Never" />
     <disable_collisions link1="gripper_base_link" link2="link_5" reason="Default" />
     <disable_collisions link1="gripper_base_link" link2="link_6" reason="Adjacent" />
     <disable_collisions link1="gripper_finger1_finger_link" link2="gripper_finger1_finger_tip_link" reason="Default" />
