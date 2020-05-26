@@ -1,0 +1,6 @@
+[submodule "abb_experimental"]
+	path = abb_experimental
+	url = git@github.com:sixer51/abb_experimental.git
+[submodule "robotiq_85_gripper"]
+	path = robotiq_85_gripper
+	url = git@github.com:sixer51/robotiq_85_gripper.git

@@ -86,7 +86,7 @@ rosrun irb120_robotiq85_gazebo forward_kinematics.py
 
 2. Inverse kinematics plan and execution (move joints):
 ```
-rosrun irb120_robotiq85_gazebo IK_destination pose.py
+rosrun irb120_robotiq85_gazebo IK_destination_pose.py
 ```
 <video src="media/irb120_robotiq85_basicIK.mp4" width="640" height="480" controls preload></video>
 
