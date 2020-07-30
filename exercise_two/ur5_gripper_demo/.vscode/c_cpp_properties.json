@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/jderobot/industrial_robot/devel/include/**",
+                "/home/jderobot/test/devel/include/**",
+                "/opt/ros/melodic/include/**",
+                "/opt/jderobot/include/**",
+                "/home/jderobot/industrial_robot/src/panda/franka_ros/franka_control/include/**",
+                "/home/jderobot/industrial_robot/src/panda/franka_ros/franka_example_controllers/include/**",
+                "/home/jderobot/industrial_robot/src/panda/franka_ros/franka_gripper/include/**",
+                "/home/jderobot/industrial_robot/src/panda/franka_ros/franka_hw/include/**",
+                "/home/jderobot/industrial_robot/src/IndustrialRobotics/robotiq_85_gripper/robotiq_85_simulation/roboticsgroup_gazebo_plugins/include/**",
+                "/home/jderobot/industrial_robot/src/ur5_notebook/include/**",
+                "/home/jderobot/industrial_robot/src/universal_robot/ur_kinematics/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
