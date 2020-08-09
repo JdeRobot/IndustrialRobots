@@ -9,8 +9,6 @@ from python_qt_binding.QtWidgets import QWidget
 from python_qt_binding import QtGui
 from python_qt_binding.QtCore import pyqtSignal
 from interfaces.robot_wrapper import RobotWrapper
-from interfaces.MyAlgorithm import Algorithm
-from interfaces.pick_and_place import Pick_Place
 import threading
 import time
 import resources_rc
@@ -68,14 +66,6 @@ class VacuumGripper(Plugin):
         with open(filename) as file:
             joints_setup = yaml.load(file)
             jointslimit = joints_setup["joints_limit"]
-        
-        self.stopevent = threading.Event()
-        self.pauseevent = threading.Event()
-
-        self.algorithm = Algorithm()
-        rospy.loginfo("Setting up algorithm")
-        self.algorithm.set_pick_and_place(Pick_Place(self.robot.arm, self.robot.gripper, self.robot.modelmanager.object_list))
-        self.start_algorithm = False
 
         self._widget.xEdit.editingFinished.connect(self.set_x)
         self._widget.yEdit.editingFinished.connect(self.set_y)
@@ -143,8 +133,7 @@ class VacuumGripper(Plugin):
 
         self._widget.rvizButton.clicked.connect(self.launchrviz)
         self._widget.start_button.clicked.connect(self.playClicked)
-        self._widget.stop_button.clicked.connect(self.stopexe)
-        self._widget.stop_button.setCheckable(True)
+        self._widget.stop_button.clicked.connect(self.stopClicked)
         self._widget.pause_button.clicked.connect(self.pauseClicked)
         self._widget.restart_button.clicked.connect(self.restartClicked)
 
@@ -160,6 +149,26 @@ class VacuumGripper(Plugin):
         rospy.Subscriber("/gui_message", String, self.browser_callback)
         self.message_pub = rospy.Publisher("/gui_message", String, queue_size=0)
         self.updatepose_pub = rospy.Publisher("/updatepose", Bool, queue_size=0)
+
+        self.startalgorithm_pub = rospy.Publisher("/start_algorithm", Bool, queue_size=0)
+        self.stopalgorithm_pub = rospy.Publisher("/stop_algorithm", Bool, queue_size=0)
+        self.pausealgorithm_pub = rospy.Publisher("/pause_algorithm", Bool, queue_size=0)
+        self.startalgorithm_sub = rospy.Subscriber("/start_algorithm", Bool, self.startalgorithm_callback)
+        self.stopalgorithm_sub = rospy.Subscriber("/stop_algorithm", Bool, self.stopalgorithm_callback)
+        self.algorithm_is_on = False
+
+    def startalgorithm_callback(self, msg):
+        self.updatepose_trigger(True)
+        if msg.data == True:
+            self.algorithm_is_on = True
+            last_time = rospy.Time.now().to_sec()
+            while self.algorithm_is_on:
+                if rospy.Time.now().to_sec()-last_time > 0.1:
+                    self.updatepose_trigger(True)
+                    last_time = rospy.Time.now().to_sec()
+
+    def stopalgorithm_callback(self, msg):
+        self.algorithm_is_on = False
 
     def browser_callback(self, msg):
         self._widget.browser.append(msg.data)
@@ -222,35 +231,27 @@ class VacuumGripper(Plugin):
     def launchrviz(self):
         os.system("gnome-terminal -x sh -c \"roslaunch rqt_industrial_robot rviz.launch\"")
 
+    def algorithm_trigger(self, pub, value):
+        msg = Bool()
+        msg.data = value
+        pub.publish(msg)
+
     def playClicked(self):
         self.send_message("Start Algorithm")
-        self.stopevent.set()
-        self.pauseevent.set()
-        self.t1 = threading.Thread(target = self.algorithm.myalgorithm, 
-                                    args = (self.stopevent,self.pauseevent,))
-        self.t2 = threading.Thread(target = self.stopChecked)
-        self.t1.start()
-        self.t2.start()
-        self.start_algorithm = True
+        self.algorithm_trigger(self.startalgorithm_pub, True)
 
-    def stopChecked(self):
-        last_time = rospy.Time.now().to_sec()
-        while self.stopevent.isSet():
-            # update robot pose browser
-            if rospy.Time.now().to_sec()-last_time > 0.1:
-                self.updatepose_trigger(True)
-                last_time = rospy.Time.now().to_sec()
-            if self._widget.stop_button.isChecked():
-                self.stopevent.clear()
-                break
+    def stopClicked(self):
+        self.send_message("Stopping Algorithm")
+        self.algorithm_trigger(self.stopalgorithm_pub, True)
+        self.algorithm_trigger(self.startalgorithm_pub, False)
 
     def pauseClicked(self):
-        self.send_message("Pause Algorithm")
-        self.pauseevent.clear()
+        self.send_message("Pausing Algorithm")
+        self.algorithm_trigger(self.pausealgorithm_pub, True)
 
     def restartClicked(self):
         self.send_message("Retart Algorithm")
-        self.pauseevent.set()
+        self.algorithm_trigger(self.pausealgorithm_pub, False)
 
     def update(self):
         while True:
@@ -331,14 +332,6 @@ class VacuumGripper(Plugin):
 
     def stopexe(self):
         self.robot.stop_execution()
-        
-        if self.start_algorithm == True:
-            self.stopevent.clear()
-            self.t1.join()
-            self.t2.join()
-            self.send_message("Stop Algorithm")
-            self._widget.stop_button.toggle()
-            self.start_algorithm = False
 
         self.updatefk()
         self.updateik()
@@ -423,9 +416,6 @@ class VacuumGripper(Plugin):
 
     def setRobotWrapper(self, robot):
         self.robot = robot
-
-    def getRobotWrapper(self):
-        return self.robot 
 
     def gripper_grasp(self):
         self.robot.gripper_grasp()

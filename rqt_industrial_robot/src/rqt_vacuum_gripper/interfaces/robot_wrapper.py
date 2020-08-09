@@ -24,8 +24,6 @@ from math import pi
 from tf.transformations import euler_from_quaternion, quaternion_from_euler, euler_matrix
 
 from geometry_msgs.msg import Pose, PoseStamped, PoseArray, Quaternion
-from pick_and_place import Pick_Place
-from MyAlgorithm import Algorithm
 from model_manager import ModelManager
 
 
@@ -232,12 +230,12 @@ class RobotWrapper:
         
     # Inverse Kinematics (IK): move TCP to given position and orientation
     def move_pose_arm(self, roll, pitch, yaw, x, y, z):
-        pose_goal = self.pose2msg(roll, pitch, yaw, x, y, z)
-        pose_goal = self.gripper2TCP(pose_goal, self.gripper_length)
+        # pose_goal = self.pose2msg(roll, pitch, yaw, x, y, z)
+        # pose_goal = self.gripper2TCP(pose_goal, self.gripper_length)
 
-        x = pose_goal.position.x
-        y = pose_goal.position.y
-        z = pose_goal.position.z
+        # x = pose_goal.position.x
+        # y = pose_goal.position.y
+        # z = pose_goal.position.z
 
         if not self.is_inside_workspace(x, y, z):
             rospy.loginfo('***** GOAL POSE IS OUT OF ROBOT WORKSPACE *****')
@@ -300,7 +298,7 @@ class RobotWrapper:
 
     def plan(self):
         pose_goal = self.pose2msg(self.roll, self.pitch, self.yaw, self.x, self.y, self.z)
-        pose_goal = self.gripper2TCP(pose_goal, self.gripper_length)
+        # pose_goal = self.gripper2TCP(pose_goal, self.gripper_length)
 
         x = pose_goal.position.x
         y = pose_goal.position.y

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -24,7 +24,7 @@
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0" rowspan="2">
-     <widget class="QLabel" name="image_raw">
+     <widget class="QLabel" name="image1">
       <property name="maximumSize">
        <size>
         <width>320</width>
@@ -64,7 +64,7 @@
        </font>
       </property>
       <property name="text">
-       <string>raw image</string>
+       <string>image1</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -85,7 +85,7 @@
        </font>
       </property>
       <property name="text">
-       <string>filtered image</string>
+       <string>image2</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -93,7 +93,7 @@
      </widget>
     </item>
     <item row="0" column="1" rowspan="2">
-     <widget class="QLabel" name="image_filtered">
+     <widget class="QLabel" name="image2">
       <property name="maximumSize">
        <size>
         <width>320</width>
@@ -118,10 +118,10 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>50</x>
      <y>20</y>
      <width>251</width>
      <height>27</height>
@@ -142,12 +142,52 @@
        </font>
       </property>
       <property name="text">
-       <string>Camera</string>
+       <string>Image1</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QComboBox" name="camera_comboBox">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>25</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>20</y>
+     <width>251</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Image2</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="camera_comboBox_2">
       <property name="maximumSize">
        <size>
         <width>16777215</width>

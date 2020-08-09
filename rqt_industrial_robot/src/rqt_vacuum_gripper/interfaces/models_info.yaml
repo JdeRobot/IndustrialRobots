@@ -1,27 +1,51 @@
 objects:
-  blue_ball:
+  blue_sphere:
     shape: sphere
     size: 0.03
-    pose: {x: 0.6, y: 0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.45, y: 0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
     color: blue
 
-  red_ball:
+  red_sphere:
     shape: sphere
     size: 0.03
-    pose: {x: 0.6, y: -0.1, z: 1, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.45, y: -0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
     color: red
 
-  # green_ball_big:
-  #   shape: sphere
-  #   size: 0.03
-  #   pose: {x: 0.5, y: 0.08, z: 1, roll: 0, pitch: 0, yaw: 0}
-  #   color: green
+  green_sphere:
+    shape: sphere
+    size: 0.03
+    pose: {x: 0.45, y: 0.09, z: 1, roll: 0, pitch: 0, yaw: 0}
+    color: green
+
+  yellow_sphere:
+    shape: sphere
+    size: 0.04
+    pose: {x: 0.45, y: -0.09, z: 1, roll: 0, pitch: 0, yaw: 0}
+    color: yellow
 
   green_cylinder:
     shape: cylinder
     size: {radius: 0.03, height: 0.05}
-    pose: {x: 0.6, y: 0.1, z: 1, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.65, y: -0.09, z: 1, roll: 0, pitch: 0, yaw: 0}
     color: green
+
+  yellow_cylinder:
+    shape: cylinder
+    size: {radius: 0.02, height: 0.06}
+    pose: {x: 0.65, y: 0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
+    color: yellow
+
+  red_cylinder:
+    shape: cylinder
+    size: {radius: 0.02, height: 0.06}
+    pose: {x: 0.65, y: 0.09, z: 1, roll: 0, pitch: 0, yaw: 0}
+    color: red
+
+  blue_cylinder:
+    shape: cylinder
+    size: {radius: 0.04, height: 0.07}
+    pose: {x: 0.65, y: -0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
+    color: blue
 
 obstacles:
   conveyor:
