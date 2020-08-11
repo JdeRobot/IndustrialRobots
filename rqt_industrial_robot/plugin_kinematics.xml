@@ -1,0 +1,12 @@
+<library path="src">
+  <class name="Kinematics" type="rqt_kinematics.kinematics_module.Kinematics" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Robot kinematic Python GUI plugin
+    </description>
+    <qtgui>
+      <label>rqt_kinematics</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>Great user interface to provide real value.</statustip>
+    </qtgui>
+  </class>
+</library>

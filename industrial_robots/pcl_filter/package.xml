@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pcl_filter</name>
+  <version>0.0.0</version>
+  <description>The pcl_filter package</description>
+
+  <maintainer email="sixerwyj@gmail.com">Yijia Wu</maintainer>
+  <author email="sixerwyj@gmail.com">Yijia Wu</author>
+
+  <license>GPLv3</license>
+
+  <build_depend>message_generation</build_depend>
+  <build_export_depend>message_runtime</build_export_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>pcl</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>pcl_filter_msgs</build_depend>
+  <build_export_depend>pcl</build_export_depend>
+  <build_export_depend>pcl_ros</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <exec_depend>pcl</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>pcl_filter_msgs</exec_depend>
+
+
+  <export>
+
+  </export>
+</package>

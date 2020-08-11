@@ -1,0 +1,554 @@
+#include <ros/ros.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+// #include <pcl_conversions/pcl_conversions.h>
+#include <boost/foreach.hpp>
+#include <pcl/filters/conditional_removal.h>
+#include <tf/transform_broadcaster.h>
+
+#include <opencv/cv.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/image_encodings.h>
+
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
+typedef pcl::PointXYZ PointT;
+
+class ObjectDetection
+{
+public:
+  ObjectDetection()
+  {
+    pub_green_sphere = nh.advertise<PointCloud> ("/green_sphere", 1);
+    pub_red_sphere = nh.advertise<PointCloud> ("/red_sphere", 1);
+    pub_blue_sphere = nh.advertise<PointCloud> ("/blue_sphere", 1);
+    pub_yellow_sphere = nh.advertise<PointCloud> ("/yellow_sphere", 1);
+    pub_green_cylinder = nh.advertise<PointCloud> ("/green_cylinder", 1);
+    pub_red_cylinder = nh.advertise<PointCloud> ("/red_cylinder", 1);
+    pub_blue_cylinder = nh.advertise<PointCloud> ("/blue_cylinder", 1);
+    pub_yellow_cylinder = nh.advertise<PointCloud> ("/yellow_cylinder", 1);
+
+    pub_blue = nh.advertise<PointCloudRGB> ("/blue_filter", 1);
+    pub_red = nh.advertise<PointCloudRGB> ("/red_filter", 1);
+    pub_green = nh.advertise<PointCloudRGB> ("/green_filter", 1);
+    pub_yellow = nh.advertise<PointCloudRGB> ("/yellow_filter", 1);
+
+    image_pub_blue = nh.advertise<sensor_msgs::Image>("blue_filtered_image",1);
+    image_pub_green = nh.advertise<sensor_msgs::Image>("green_filtered_image",1);
+    image_pub_red = nh.advertise<sensor_msgs::Image>("red_filtered_image",1);
+    image_pub_yellow = nh.advertise<sensor_msgs::Image>("yellow_filtered_image",1);
+
+    image_pub_green_sphere = nh.advertise<sensor_msgs::Image> ("/green_sphere_image", 1);
+    image_pub_red_sphere = nh.advertise<sensor_msgs::Image> ("/red_sphere_image", 1);
+    image_pub_blue_sphere = nh.advertise<sensor_msgs::Image> ("/blue_sphere_image", 1);
+    image_pub_yellow_sphere = nh.advertise<sensor_msgs::Image> ("/yellow_sphere_image", 1);
+    image_pub_green_cylinder = nh.advertise<sensor_msgs::Image> ("/green_cylinder_image", 1);
+    image_pub_red_cylinder = nh.advertise<sensor_msgs::Image> ("/red_cylinder_image", 1);
+    image_pub_blue_cylinder = nh.advertise<sensor_msgs::Image> ("/blue_cylinder_image", 1);
+    image_pub_yellow_cylinder = nh.advertise<sensor_msgs::Image> ("/yellow_cylinder_image", 1);
+
+    sub_green_sphere = nh.subscribe<PointCloud>("/green_filter", 1, &ObjectDetection::green_sphere_callback, this);
+    sub_red_sphere = nh.subscribe<PointCloud>("/red_filter", 1, &ObjectDetection::red_sphere_callback, this);
+    sub_blue_sphere = nh.subscribe<PointCloud>("/blue_filter", 1, &ObjectDetection::blue_sphere_callback, this);
+    sub_yellow_sphere = nh.subscribe<PointCloud>("/yellow_filter", 1, &ObjectDetection::yellow_sphere_callback, this);
+    sub_green_cylinder = nh.subscribe<PointCloud>("/green_filter", 1, &ObjectDetection::green_cylinder_callback, this);
+    sub_red_cylinder = nh.subscribe<PointCloud>("/red_filter", 1, &ObjectDetection::red_cylinder_callback, this);
+    sub_blue_cylinder = nh.subscribe<PointCloud>("/blue_filter", 1, &ObjectDetection::blue_cylinder_callback, this);
+    sub_yellow_cylinder = nh.subscribe<PointCloud>("/yellow_filter", 1, &ObjectDetection::yellow_cylinder_callback, this);
+
+    sub_blue = nh.subscribe<PointCloudRGB>("/kinect_camera_fixed/depth/points", 1, &ObjectDetection::bluefilter_callback, this);
+    sub_red = nh.subscribe<PointCloudRGB>("/kinect_camera_fixed/depth/points", 1, &ObjectDetection::redfilter_callback, this);
+    sub_green = nh.subscribe<PointCloudRGB>("/kinect_camera_fixed/depth/points", 1, &ObjectDetection::greenfilter_callback, this);
+    sub_yellow = nh.subscribe<PointCloudRGB>("/kinect_camera_fixed/depth/points", 1, &ObjectDetection::yellowfilter_callback, this);
+  }
+
+  void yellowfilter_callback(const PointCloudRGB::ConstPtr& msg)
+  {
+    PointCloudRGB::Ptr cloud_color_filtered(new PointCloudRGB);
+    pcl::PCLPointCloud2 cloud_filtered_ros;
+
+    pcl::ConditionalRemoval<pcl::PointXYZRGB> color_filter;
+
+    int bMax = 50;
+    int rMax = 255;
+    int rMin = 90;
+    int gMax = 255;
+    int gMin = 90;
+
+    pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr color_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::LT, bMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::LT, rMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::GT, rMin)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::LT, gMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::GT, gMin)));
+
+
+    // Build the filter
+    color_filter.setInputCloud(msg);
+    color_filter.setCondition (color_cond);
+    color_filter.filter(*cloud_color_filtered);
+
+    pub_yellow.publish(cloud_color_filtered);
+    // pointcloud_to_rgb_image(cloud_color_filtered, image_pub_yellow);
+  }
+
+  void bluefilter_callback(const PointCloudRGB::ConstPtr& msg)
+  {
+    PointCloudRGB::Ptr cloud_color_filtered(new PointCloudRGB);
+    pcl::PCLPointCloud2 cloud_filtered_ros;
+
+    pcl::ConditionalRemoval<pcl::PointXYZRGB> color_filter;
+
+    int bMax = 255;
+    int bMin = 90;
+    int rMax = 50;
+    int gMax = 50;
+
+    pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr color_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::LT, bMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::GT, bMin)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::LT, rMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::LT, gMax)));
+
+
+    // Build the filter
+    color_filter.setInputCloud(msg);
+    color_filter.setCondition (color_cond);
+    color_filter.filter(*cloud_color_filtered);
+
+    pub_blue.publish(cloud_color_filtered);
+    // pointcloud_to_rgb_image(cloud_color_filtered, image_pub_blue);
+  }
+
+  void redfilter_callback(const PointCloudRGB::ConstPtr& msg)
+  {
+    PointCloudRGB::Ptr cloud_color_filtered(new PointCloudRGB);
+    pcl::PCLPointCloud2 cloud_filtered_ros;
+
+    pcl::ConditionalRemoval<pcl::PointXYZRGB> color_filter;
+
+    // build the condition
+    int rMax = 255;
+    int rMin = 90;
+    int gMax = 50;
+    int bMax = 50;
+
+    pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr color_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::LT, rMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::GT, rMin)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::LT, gMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::LT, bMax)));
+
+    // Build the filter
+    color_filter.setInputCloud(msg);
+    color_filter.setCondition (color_cond);
+    color_filter.filter(*cloud_color_filtered);
+
+    pub_red.publish(cloud_color_filtered);
+    // pointcloud_to_rgb_image(cloud_color_filtered, image_pub_red);
+  }
+
+  void greenfilter_callback(const PointCloudRGB::ConstPtr& msg)
+  {
+    PointCloudRGB::Ptr cloud_color_filtered(new PointCloudRGB);
+    pcl::PCLPointCloud2 cloud_filtered_ros;
+
+    pcl::ConditionalRemoval<pcl::PointXYZRGB> color_filter;
+
+    // build the condition
+    int gMax = 255;
+    int gMin = 90;
+    int rMax = 50;
+    int bMax = 50;
+
+    pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr color_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::LT, gMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::GT, gMin)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::LT, rMax)));
+    color_cond->addComparison (pcl::PackedRGBComparison<pcl::PointXYZRGB>::Ptr (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::LT, bMax)));
+
+    // Build the filter
+    color_filter.setInputCloud(msg);
+    color_filter.setCondition (color_cond);
+    color_filter.filter(*cloud_color_filtered);
+
+    pub_green.publish(cloud_color_filtered);
+    // pointcloud_to_rgb_image(cloud_color_filtered, image_pub_green);
+  }
+
+  void green_sphere_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_sphere(msg, pub_green_sphere, image_pub_green_sphere, "green_sphere", 0.035);
+  }
+
+  void red_sphere_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_sphere(msg, pub_red_sphere, image_pub_red_sphere, "red_sphere", 0.035);
+  }
+
+  void blue_sphere_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_sphere(msg, pub_blue_sphere, image_pub_blue_sphere, "blue_sphere", 0.035);
+  }
+
+  void yellow_sphere_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_sphere(msg, pub_yellow_sphere, image_pub_yellow_sphere, "yellow_sphere", 0.045);
+  }
+
+  void green_cylinder_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_cylinder(msg, pub_green_cylinder, image_pub_green_cylinder, "green_cylinder", 0.035);
+  }
+
+  void red_cylinder_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_cylinder(msg, pub_red_cylinder, image_pub_red_cylinder, "red_cylinder", 0.025);
+  }
+
+  void blue_cylinder_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_cylinder(msg, pub_blue_cylinder, image_pub_blue_cylinder, "blue_cylinder", 0.045);
+  }
+
+  void yellow_cylinder_callback(const PointCloud::ConstPtr& msg)
+  {
+    detect_cylinder(msg, pub_yellow_cylinder, image_pub_yellow_cylinder, "yellow_cylinder", 0.025);
+  }
+
+  void detect_cylinder(const PointCloud::ConstPtr& cloud, ros::Publisher pub, ros::Publisher image_pub, std::string frame_id, float radius)
+  {
+    // All the objects needed
+    pcl::PassThrough<PointT> pass;
+    pcl::NormalEstimation<PointT, pcl::Normal> ne;
+    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
+    pcl::ExtractIndices<PointT> extract;
+    pcl::ExtractIndices<pcl::Normal> extract_normals;
+    pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+
+    // Datasets
+    PointCloud::Ptr cloud_filtered (new PointCloud);
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+    PointCloud::Ptr cloud_filtered2 (new PointCloud);
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+    pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new pcl::PointIndices);
+
+    // Build a passthrough filter to remove spurious NaNs
+    pass.setInputCloud (cloud);
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (0, 1);
+    pass.filter (*cloud_filtered);
+    // std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
+
+    if(cloud_filtered->points.size ()<1000)
+      return;
+
+    // Estimate point normals
+    ne.setSearchMethod (tree);
+    ne.setInputCloud (cloud_filtered);
+    ne.setKSearch (50);
+    ne.compute (*cloud_normals);
+
+    // Create the segmentation object for the planar model and set all the parameters
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+    seg.setNormalDistanceWeight (0.1);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.03);
+    seg.setInputCloud (cloud_filtered);
+    seg.setInputNormals (cloud_normals);
+    // Obtain the plane inliers and coefficients
+    seg.segment (*inliers_plane, *coefficients_plane);
+    // std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
+
+    // Extract the planar inliers from the input cloud
+    extract.setInputCloud (cloud_filtered);
+    extract.setIndices (inliers_plane);
+    extract.setNegative (false);
+
+    // Remove the planar inliers, extract the rest
+    extract.setNegative (true);
+    extract.filter (*cloud_filtered2);
+    extract_normals.setNegative (true);
+    extract_normals.setInputCloud (cloud_normals);
+    extract_normals.setIndices (inliers_plane);
+    extract_normals.filter (*cloud_normals2);
+
+    if(cloud_filtered2->points.size ()<1000)
+      return;
+
+    // Create the segmentation object for cylinder segmentation and set all the parameters
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_CYLINDER);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setNormalDistanceWeight (0.1);
+    seg.setMaxIterations (10000);
+    seg.setDistanceThreshold (0.05);
+    seg.setRadiusLimits (0, radius);
+    seg.setInputCloud (cloud_filtered2);
+    seg.setInputNormals (cloud_normals2);
+
+    // Obtain the sphere inliers and coefficients
+    seg.segment (*inliers_cylinder, *coefficients_cylinder);
+    // std::cerr << "cylinder coefficients: " << *coefficients_cylinder << std::endl;
+
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
+    transform.setOrigin( tf::Vector3(coefficients_cylinder->values[0], coefficients_cylinder->values[1], coefficients_cylinder->values[2]) );
+    tf::Quaternion q;
+    q.setRPY(0, 0, 0);
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), coefficients_cylinder->header.frame_id, frame_id));
+
+    // Write the cylinder inliers to disk
+    extract.setInputCloud (cloud_filtered2);
+    extract.setIndices (inliers_cylinder);
+    extract.setNegative (false);
+    pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
+    extract.filter (*cloud_cylinder);
+
+    pub.publish(cloud_cylinder);
+    pointcloud_to_depth_image(cloud_cylinder, image_pub);
+  }
+
+  void detect_sphere(const PointCloud::ConstPtr& cloud, ros::Publisher pub, ros::Publisher image_pub, std::string frame_id, float radius)
+  {
+    // All the objects needed
+    pcl::PassThrough<PointT> pass;
+    pcl::NormalEstimation<PointT, pcl::Normal> ne;
+    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
+    pcl::ExtractIndices<PointT> extract;
+    pcl::ExtractIndices<pcl::Normal> extract_normals;
+    pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+
+    // Datasets
+    PointCloud::Ptr cloud_filtered (new PointCloud);
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+    PointCloud::Ptr cloud_filtered2 (new PointCloud);
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+    pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
+
+    // Build a passthrough filter to remove spurious NaNs
+    pass.setInputCloud (cloud);
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (0, 1);
+    pass.filter (*cloud_filtered);
+    // std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
+
+    if(cloud_filtered->points.size ()<1000)
+      return;
+
+    // Estimate point normals
+    ne.setSearchMethod (tree);
+    ne.setInputCloud (cloud_filtered);
+    ne.setKSearch (50);
+    ne.compute (*cloud_normals);
+
+    // Create the segmentation object for the planar model and set all the parameters
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+    seg.setNormalDistanceWeight (0.1);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.03);
+    seg.setInputCloud (cloud_filtered);
+    seg.setInputNormals (cloud_normals);
+    // Obtain the plane inliers and coefficients
+    seg.segment (*inliers_plane, *coefficients_plane);
+    // std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
+
+    // Extract the planar inliers from the input cloud
+    extract.setInputCloud (cloud_filtered);
+    extract.setIndices (inliers_plane);
+    extract.setNegative (false);
+
+    // Remove the planar inliers, extract the rest
+    extract.setNegative (true);
+    extract.filter (*cloud_filtered2);
+    extract_normals.setNegative (true);
+    extract_normals.setInputCloud (cloud_normals);
+    extract_normals.setIndices (inliers_plane);
+    extract_normals.filter (*cloud_normals2);
+
+    if(cloud_filtered2->points.size ()<1000)
+      return;
+
+    // Create the segmentation object for sphere segmentation and set all the parameters
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_NORMAL_SPHERE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setNormalDistanceWeight (0.1);
+    seg.setMaxIterations (10000);
+    seg.setDistanceThreshold (0.05);
+    seg.setRadiusLimits (0, radius);
+    seg.setInputCloud (cloud_filtered2);
+    seg.setInputNormals (cloud_normals2);
+
+    // Obtain the sphere inliers and coefficients
+    seg.segment (*inliers_sphere, *coefficients_sphere);
+    // std::cerr << "sphere coefficients: " << *coefficients_sphere << std::endl;
+
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
+    //float radius = coefficients_sphere->values[3];
+    transform.setOrigin( tf::Vector3(coefficients_sphere->values[0], coefficients_sphere->values[1], coefficients_sphere->values[2]) );
+    tf::Quaternion q;
+    q.setRPY(0, 0, 0);
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), coefficients_sphere->header.frame_id, frame_id));
+
+    // Write the sphere inliers to disk
+    extract.setInputCloud (cloud_filtered2);
+    extract.setIndices (inliers_sphere);
+    extract.setNegative (false);
+    pcl::PointCloud<PointT>::Ptr cloud_sphere (new pcl::PointCloud<PointT> ());
+    extract.filter (*cloud_sphere);
+
+    pub.publish(cloud_sphere);
+    pointcloud_to_depth_image(cloud_sphere, image_pub);
+  }
+
+  void pointcloud_to_depth_image(const PointCloud::ConstPtr& msg, ros::Publisher pub)
+  {
+    float centre_x = 320.5;
+    float centre_y = 240.5;
+    float focal_x = 554.254691191187;
+    float focal_y = 554.254691191187;
+    int height = 480;
+    int width = 640;
+
+    cv::Mat cv_image = cv::Mat(height, width, CV_32FC1, cv::Scalar(std::numeric_limits<float>::max()));
+
+    for (int i=0; i<msg->points.size();i++){
+      if (msg->points[i].z == msg->points[i].z){
+        float z = msg->points[i].z*1000.0;
+        float u = (msg->points[i].x*1000.0*focal_x) / z;
+        float v = (msg->points[i].y*1000.0*focal_y) / z;
+        int pixel_pos_x = (int)(u + centre_x);
+        int pixel_pos_y = (int)(v + centre_y);
+
+        if (pixel_pos_x > (width-1)){
+          pixel_pos_x = width -1;
+        }
+        if (pixel_pos_y > (height-1)){
+          pixel_pos_y = height-1;
+        }
+        cv_image.at<float>(pixel_pos_y,pixel_pos_x) = z;
+      }       
+    }
+
+    cv_image.convertTo(cv_image,CV_8UC1);
+
+    sensor_msgs::ImagePtr output_image = cv_bridge::CvImage(std_msgs::Header(), "16UC1", cv_image).toImageMsg();
+    output_image->header.frame_id = "camera_depth_optical_frame";
+    // output_image->header.stamp = info.header.stamp = t;
+    pub.publish(output_image);
+  }
+
+  void pointcloud_to_rgb_image(const PointCloudRGB::ConstPtr& msg, ros::Publisher pub)
+  {
+    float centre_x = 320.5;
+    float centre_y = 240.5;
+    float focal_x = 554.254691191187;
+    float focal_y = 554.254691191187;
+    int height = 480;
+    int width = 640;
+
+    cv::Mat cv_image = cv::Mat(height, width, CV_8UC3);
+
+    for (int i=0; i<msg->points.size();i++){
+      if (msg->points[i].z == msg->points[i].z){
+        float z = msg->points[i].z*1000.0;
+        float u = (msg->points[i].x*1000.0*focal_x) / z;
+        float v = (msg->points[i].y*1000.0*focal_y) / z;
+        int pixel_pos_x = (int)(u + centre_x);
+        int pixel_pos_y = (int)(v + centre_y);
+
+        int r = msg->points[i].r;
+        int g = msg->points[i].g;
+        int b = msg->points[i].b;
+
+        if (pixel_pos_x > (width-1)){
+          pixel_pos_x = width -1;
+        }
+        if (pixel_pos_y > (height-1)){
+          pixel_pos_y = height-1;
+        }
+
+        cv_image.at<cv::Vec3b>(pixel_pos_y,pixel_pos_x) = cv::Vec3b(b, g, r);
+      }       
+    }
+
+    sensor_msgs::ImagePtr output_image = cv_bridge::CvImage(std_msgs::Header(), "8UC3", cv_image).toImageMsg();
+    output_image->header.frame_id = "camera_depth_optical_frame";
+    // output_image->header.stamp = info.header.stamp = t;
+    pub.publish(output_image);
+  }
+
+private:
+  ros::NodeHandle nh;
+  
+  ros::Publisher pub_blue_sphere;
+  ros::Publisher pub_red_sphere;
+  ros::Publisher pub_green_sphere;
+  ros::Publisher pub_yellow_sphere;
+  ros::Publisher pub_red_cylinder;
+  ros::Publisher pub_green_cylinder;
+  ros::Publisher pub_blue_cylinder;
+  ros::Publisher pub_yellow_cylinder;
+
+  ros::Publisher pub_blue;
+  ros::Publisher pub_red;
+  ros::Publisher pub_green;
+  ros::Publisher pub_yellow;
+
+  ros::Publisher image_pub_blue;
+  ros::Publisher image_pub_red;
+  ros::Publisher image_pub_green;
+  ros::Publisher image_pub_yellow;
+
+  ros::Publisher image_pub_blue_sphere;
+  ros::Publisher image_pub_red_sphere;
+  ros::Publisher image_pub_green_sphere;
+  ros::Publisher image_pub_yellow_sphere;
+  ros::Publisher image_pub_red_cylinder;
+  ros::Publisher image_pub_green_cylinder;
+  ros::Publisher image_pub_blue_cylinder;
+  ros::Publisher image_pub_yellow_cylinder;
+
+  ros::Subscriber sub_red_sphere;
+  ros::Subscriber sub_green_sphere;
+  ros::Subscriber sub_blue_sphere;
+  ros::Subscriber sub_yellow_sphere;
+  ros::Subscriber sub_red_cylinder;
+  ros::Subscriber sub_green_cylinder;
+  ros::Subscriber sub_blue_cylinder;
+  ros::Subscriber sub_yellow_cylinder;
+
+  ros::Subscriber sub_blue;
+  ros::Subscriber sub_red;
+  ros::Subscriber sub_green;
+  ros::Subscriber sub_yellow;
+
+};
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "object_detection");
+  ObjectDetection od;
+  ros::spin();
+}
+
+
