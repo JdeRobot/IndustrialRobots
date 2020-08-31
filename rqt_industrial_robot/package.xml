@@ -15,18 +15,21 @@
   <build_depend>rqt_gui_py</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>gazebo_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>rqt_gui</build_export_depend>
   <build_export_depend>rqt_gui_py</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>gazebo_msgs</build_export_depend>
+  <build_export_depend>trajectory_msgs</build_export_depend>
   <build_export_depend>tf</build_export_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>rqt_gui</exec_depend>
   <exec_depend>rqt_gui_py</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>gazebo_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
 
   <export>
@@ -34,5 +37,6 @@
     <rqt_gui plugin="${prefix}/plugin_kinematics.xml"/>
     <rqt_gui plugin="${prefix}/plugin_vacuum_gripper.xml"/>
     <rqt_gui plugin="${prefix}/plugin_camera.xml"/>
+    <rqt_gui plugin="${prefix}/plugin_mobile_manipulator.xml"/>
   </export>
 </package>
