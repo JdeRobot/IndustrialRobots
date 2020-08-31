@@ -1,0 +1,21 @@
+controller_list:
+  - name: fake_ur10_manipulator_controller
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+  # - name: fake_finger1_controller
+  #   joints:
+  #     - H1_F1J3
+  # - name: fake_finger2_controller
+  #   joints:
+  #     - H1_F2J3
+  # - name: fake_finger3_controller
+  #   joints:
+  #     - H1_F3J3
+initial:  # Define initial robot poses.
+#  - group: ur10_manipulator
+#    pose: home

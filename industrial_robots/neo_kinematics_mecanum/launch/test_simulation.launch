@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<!-- upload parameters -->
+        <rosparam command="load" ns="kinematics_mecanum" file="$(find neo_kinematics_mecanum)/launch/test_setup.yaml"/>
+	
+	<!-- start simulation node -->
+        <node pkg="neo_kinematics_mecanum" type="neo_kinematics_mecanum_sim_node" ns="kinematics_mecanum" name="neo_kinematics_mecanum_sim_node" respawn="false" output="screen"/>
+
+</launch>

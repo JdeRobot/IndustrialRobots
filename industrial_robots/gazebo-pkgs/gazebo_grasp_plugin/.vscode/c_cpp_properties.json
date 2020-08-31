@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/jderobot/testgui/devel/include/**",
+                "/opt/ros/melodic/include/**",
+                "/opt/jderobot/include/**",
+                "/home/jderobot/testgui/src/gazebo-pkgs/gazebo_grasp_plugin/include/**",
+                "/home/jderobot/testgui/src/gazebo-pkgs/gazebo_version_helpers/include/**",
+                "/home/jderobot/testgui/src/gazebo-pkgs/gazebo_world_plugin_loader/include/**",
+                "/home/jderobot/testgui/src/IndustrialRobotics/robotiq_85_gripper/robotiq_85_simulation/roboticsgroup_gazebo_plugins/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}

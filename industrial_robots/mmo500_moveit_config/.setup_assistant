@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: neo_simulation
+    relative_path: robots/mmo_500/mmo_500.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/mmo_500.srdf
+  CONFIG:
+    author_name: Yijia Wu
+    author_email: sixerwyj@gmail.com
+    generated_timestamp: 1597417436

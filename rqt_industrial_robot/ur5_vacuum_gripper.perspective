@@ -1,0 +1,106 @@
+{
+  "keys": {},
+  "groups": {
+    "pluginmanager": {
+      "keys": {
+        "running-plugins": {
+          "type": "repr",
+          "repr": "{u'rqt_industrial_robot/VacuumGripper': [1]}"
+        }
+      },
+      "groups": {
+        "plugin__rqt_industrial_robot__Vacuum_gripper__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__VacuumGripper": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Form'"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__rqt_industrial_robot__VacuumGripper__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__VacuumGripper": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Form'"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__rqt_industrial_robot__Vacuum_gripper__2": {
+          "keys": {},
+          "groups": {
+            "dock_widget__VacuumGripper": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Form (2)'"
+                }
+              },
+              "groups": {}
+            }
+          }
+        }
+      }
+    },
+    "mainwindow": {
+      "keys": {
+        "geometry": {
+          "type": "repr(QByteArray.hex)",
+          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb00020000000003a20000017c00000719000003f3000003a20000019a00000719000003f300000000000000000780')",
+          "pretty-print": "       |                 "
+        },
+        "state": {
+          "type": "repr(QByteArray.hex)",
+          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd0000000100000003000003780000022efc0100000001fb0000006a007200710074005f0069006e0064007500730074007200690061006c005f0072006f0062006f0074005f005f00560061006300750075006d0047007200690070007000650072005f005f0031005f005f00560061006300750075006d00470072006900700070006500720100000000000003780000009c00ffffff000003780000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "pretty-print": "                 jrqt_industrial_robot__VacuumGripper__1__VacuumGripper                            6MinimizedDockWidgetsToolbar        "
+        }
+      },
+      "groups": {
+        "toolbar_areas": {
+          "keys": {
+            "MinimizedDockWidgetsToolbar": {
+              "type": "repr",
+              "repr": "8"
+            }
+          },
+          "groups": {}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+gripper_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+     - gripper_finger1_joint
+  constraints:
+      goal_time: 0.8
+      stopped_velocity_tolerance: 0.05
+      gripper_finger1_joint: {trajectory: 0.05, goal: 0.01}
+  stop_trajectory_duration: 0.1
+  state_publish_rate:  25
+  action_monitor_rate: 10
+
+# Tune the pid parameters if want to use pid controller
+# gazebo_ros_control/pid_gains:
+#   gripper_finger1_joint: {p: 1.0, i: 0.0, d: 0.0}
