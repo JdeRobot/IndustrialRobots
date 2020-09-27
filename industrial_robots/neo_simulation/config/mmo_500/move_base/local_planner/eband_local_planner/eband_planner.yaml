@@ -9,8 +9,8 @@ EBandPlannerROS:
   max_vel_th : 1.0
   min_vel_lin : 0.0
   min_vel_th : 0.0
-  xy_goal_tolerance : 0.1
-  yaw_goal_tolerance : 0.05
+  xy_goal_tolerance : 0.06
+  yaw_goal_tolerance : 0.06
   rot_stopped_vel : 0.01
   trans_stopped_vel : 0.01 
   eband_min_relative_overlap : 0.7  
