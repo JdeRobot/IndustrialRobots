@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   rqt_gui_py
   gazebo_msgs
   geometry_msgs
+  trajectory_msgs
   tf
 )
 
@@ -21,6 +22,7 @@ install(PROGRAMS
   scripts/rqt_kinematics
   scripts/rqt_vacuum_gripper
   scripts/rqt_camera
+  scripts/rqt_mobile_manipulator
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -33,5 +35,6 @@ install(FILES
   plugin_kinematics.xml
   plugin_vacuum_gripper.xml
   plugin_camera.xml
+  plugin_mobile_manipulator.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

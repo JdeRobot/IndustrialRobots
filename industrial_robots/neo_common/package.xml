@@ -1,0 +1,20 @@
+<package>
+    <name>neo_common</name>
+    <version>1.0.0</version>
+    <description>
+		Common Neobotix functionality to be shared with other packages.
+    </description>
+    <author>Max Wittal</author>
+    <author>wittal@neobotix.de</author>
+    <maintainer email="ros@neobotix.de">Neobotix GmbH</maintainer>
+    <maintainer email="wittal@neobotix.de">Max Wittal</maintainer>
+    <license>BSD</license>
+    <url>https://github.com/neobotix/neo_common</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>cmake_modules</build_depend>
+
+</package>
+
+
