@@ -30,7 +30,7 @@ class ur5_mp:
         moveit_commander.roscpp_initialize(sys.argv)
 
         # Initialize the move group for the ur5_arm
-        self.arm = moveit_commander.MoveGroupCommander('ur5')
+        self.arm = moveit_commander.MoveGroupCommander('ur5_manipulator')
 
         # Get the name of the end-effector link
         self.end_effector_link = self.arm.get_end_effector_link()
