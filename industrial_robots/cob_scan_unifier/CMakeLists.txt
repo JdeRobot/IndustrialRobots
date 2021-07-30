@@ -56,7 +56,7 @@ add_executable(scan_unifier_node src/scan_unifier_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(scan_unifier_node cob_scan_unifier_gencpp)
+add_dependencies(scan_unifier_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(scan_unifier_node
