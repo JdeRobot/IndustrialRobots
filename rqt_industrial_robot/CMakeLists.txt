@@ -18,11 +18,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-install(PROGRAMS 
-  scripts/rqt_kinematics
-  scripts/rqt_vacuum_gripper
-  scripts/rqt_camera
-  scripts/rqt_mobile_manipulator
+catkin_install_python(PROGRAMS
+  scripts/rqt_kinematics.py
+  scripts/rqt_vacuum_gripper.py
+  scripts/rqt_camera.py
+  scripts/rqt_mobile_manipulator.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
