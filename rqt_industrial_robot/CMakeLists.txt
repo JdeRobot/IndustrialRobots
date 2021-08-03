@@ -28,13 +28,19 @@ catkin_install_python(PROGRAMS
 
 install(DIRECTORY
   resources
+  src
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 install(FILES
-  plugin_kinematics.xml
-  plugin_vacuum_gripper.xml
+  all.perspective
+  kinematics.perspective
+  mobile_manipulator.perspective
   plugin_camera.xml
+  plugin_kinematics.xml
   plugin_mobile_manipulator.xml
+  plugin_vacuum_gripper.xml
+  ur5_vacuum_gripper.perspective
+  ur5_vacuum_gripper_camera.perspective
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
