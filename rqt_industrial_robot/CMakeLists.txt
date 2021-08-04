@@ -18,23 +18,29 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-install(PROGRAMS 
-  scripts/rqt_kinematics
-  scripts/rqt_vacuum_gripper
-  scripts/rqt_camera
-  scripts/rqt_mobile_manipulator
+catkin_install_python(PROGRAMS
+  scripts/rqt_kinematics.py
+  scripts/rqt_vacuum_gripper.py
+  scripts/rqt_camera.py
+  scripts/rqt_mobile_manipulator.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY
   resources
+  src
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 install(FILES
-  plugin_kinematics.xml
-  plugin_vacuum_gripper.xml
+  all.perspective
+  kinematics.perspective
+  mobile_manipulator.perspective
   plugin_camera.xml
+  plugin_kinematics.xml
   plugin_mobile_manipulator.xml
+  plugin_vacuum_gripper.xml
+  ur5_vacuum_gripper.perspective
+  ur5_vacuum_gripper_camera.perspective
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
