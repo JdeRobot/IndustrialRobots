@@ -2,6 +2,12 @@
 
 # JdeRobot Industrial Robotics #
 
-Industrial Robotics is an **open source** collection of resources for JdeRobot projects and activities related to autonomous robotic manipulation with real and simulated robotic arms and cobots. It is based in ROS and Gazebo. On top of them, the [MoveIt! framework](https://moveit.ros.org/) is used for 3D perception, interaction and planning. 
+Industrial Robotics is an **open source** collection of resources used in JdeRobot projects and activities related to autonomous robotic manipulation with real and simulated robotic arms and cobots. 
 
-Please check each folder for more information, detailed installation instructions and examples of usage.
+It is based on the excellent work of the IFRA Cranfield Group. Check out their repos at:
+- IFRA-Cranfield (2023) ROS 2 Sim-to-Real Robot Control. URL: https://github.com/IFRA-Cranfield/ros2_SimRealRobotControl. 
+
+## Instalation and usage ##
+
+Installation instructions and examples of usage will be provided later.
+

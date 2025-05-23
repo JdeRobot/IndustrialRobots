@@ -1,4 +1,0 @@
-int16 id
-bool state
----
-bool success
