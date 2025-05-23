@@ -1,0 +1,52 @@
+Specifications:
+  Robot: "irb120"
+  EndEffector: "VacuumGripper"
+  EELink: "EE_ls_vgr"
+  Objects: ["blue_box", "red_box", "yellow_box", "green_box"]
+
+Sequence: 
+
+  - Step: 1
+    Name: "[IRB120-Demo]: MoveJ - Go to Home Position."
+    Type: "MoveJ"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      joint1: 0.0
+      joint2: 0.0
+      joint3: 0.0
+      joint4: 0.0
+      joint5: 90.0
+      joint6: 0.0
+
+  - Step: 2
+    Name: "[IRB120-Demo]: MoveL to start point to pick"
+    Type: "MoveL"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      x: 0.1
+      y: 0.0
+      z: -0.2
+
+  - Step: 3
+    Name: "[IRB120-Demo]: MoveL to aproximation point for yellow box"
+    Type: "MoveL"
+    Speed: 0.5
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.3
+      z: -0.15
+  
+  - Step: 4
+    Name: "[IRB120-Demo]: MoveL to pick point at reduced speed"
+    Type: "MoveL"
+    Speed: 0.05
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: -0.045
+      
+

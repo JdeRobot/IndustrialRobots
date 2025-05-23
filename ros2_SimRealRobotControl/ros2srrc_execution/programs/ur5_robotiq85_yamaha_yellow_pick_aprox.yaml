@@ -1,0 +1,20 @@
+Specifications:
+  Robot: "ur5"
+  EndEffector: "ParallelGripper"
+  EELink: "EE_robotiq_2f85"
+  Objects: ["blue_sphere_small", "red_box_small", "yellow_box_small", "green_cylinder_small"]
+  
+Sequence: 
+      
+  - Step: 1
+    Name: "[Yamaha-Demo]: MoveL to yellow box PICK point"
+    Type: "MoveL"
+    Speed: 0.3
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: -0.15
+    
+      
+

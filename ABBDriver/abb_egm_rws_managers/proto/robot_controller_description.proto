@@ -1,0 +1,224 @@
+//======================================================================================================================
+//
+// Messages for structuring key information about an ABB robot controller
+//
+//======================================================================================================================
+
+syntax = "proto2";
+
+package abb.robot;
+
+//======================================================================================================================
+//
+// Primary messages
+//
+//======================================================================================================================
+
+message Header
+{
+  optional string           ip_address         = 1;
+  optional uint32           rws_port_number    = 2;
+  optional RobotWareVersion robot_ware_version = 3;
+  optional string           system_name        = 4;
+  optional string           system_type        = 5;
+  repeated string           options            = 6;
+}
+
+message RobotControllerDescription
+{
+  optional Header              header                  = 1;
+  optional SystemIndicators    system_indicators       = 2;
+  repeated MechanicalUnitGroup mechanical_units_groups = 3;
+  repeated RAPIDTask           rapid_tasks             = 4;
+}
+
+//======================================================================================================================
+//
+// Auxiliary messages
+//
+//======================================================================================================================
+
+message RobotWareVersion
+{
+  optional string name         = 1;
+  optional uint32 major_number = 2;
+  optional uint32 minor_number = 3;
+  optional uint32 patch_number = 4;
+}
+
+message Cartesian
+{
+  optional double x = 1;
+  optional double y = 2;
+  optional double z = 3;
+}
+
+// Note: The quaternion is defined as: q1 + q2*i + q3*j + q4*k.
+message Quaternion
+{
+  optional double q1 = 1;
+  optional double q2 = 2;
+  optional double q3 = 3;
+  optional double q4 = 4;
+}
+
+message Pose
+{
+  optional Cartesian  position = 1;
+  optional Quaternion rotation = 2;
+}
+
+//==========================================================
+//
+// System indicator messages
+//
+//==========================================================
+
+message RobotIndicators
+{
+  optional bool irb14000 = 1;
+}
+
+message OptionIndicators
+{
+  optional bool egm         = 1;
+  optional bool leadthrough = 2;
+  optional bool multimove   = 3;
+}
+
+message AddInIndicators
+{
+  optional bool smart_gripper     = 1;
+  optional bool state_machine_1_0 = 2;
+  optional bool state_machine_1_1 = 3;
+}
+
+message SystemIndicators
+{
+  optional RobotIndicators  robots  = 1;
+  optional OptionIndicators options = 2;
+  optional AddInIndicators  addins  = 3;
+}
+
+//==========================================================
+//
+// Mechanical unit group messages
+//
+//==========================================================
+
+message Transmission
+{
+  optional string name          = 1;
+  optional bool   rotating_move = 2;
+}
+
+message Arm
+{
+  optional string name              = 1;
+  optional double lower_joint_bound = 2;
+  optional double upper_joint_bound = 3;
+}
+
+message Joint
+{
+  optional string       name                  = 1;
+  optional int32        logical_axis          = 2;
+  optional int32        kinematic_axis_number = 3;
+  optional Arm          arm                   = 4;
+  optional Transmission transmission          = 5;
+}
+
+message StandardizedJoint
+{
+  optional string original_name     = 1;
+  optional string standardized_name = 2;
+  optional bool   rotating_move     = 3;
+  optional double lower_joint_bound = 4;
+  optional double upper_joint_bound = 5;
+}
+
+message Single
+{
+  optional string name                = 1;
+  optional string type                = 2;
+  optional Joint  joint               = 3;
+  optional Pose   base_frame          = 4;
+  optional string base_frame_moved_by = 5;
+}
+
+message Robot
+{
+  optional string name                = 1;
+  optional string type                = 2;
+  repeated Joint  joints              = 3;
+  optional Pose   base_frame          = 4;
+  optional string base_frame_moved_by = 5;
+}
+
+message MechanicalUnit
+{
+  enum Type
+  {
+    UNDEFINED = 0;
+    NONE      = 1;
+    TCP_ROBOT = 2;
+    ROBOT     = 3;
+    SINGLE    = 4;
+  }
+
+  enum Mode
+  {
+    DEACTIVATED = 0;
+    ACTIVATED   = 1;
+  }
+
+  optional string            name                = 1;
+  optional Robot             robot               = 2;
+  repeated Single            singles             = 3;
+  optional Type              type                = 4 [default = UNDEFINED];
+  optional string            task_name           = 5;
+  optional int32             axes                = 6;
+  optional int32             axes_total          = 7;
+  optional string            is_integrated_unit  = 8;
+  optional string            has_integrated_unit = 9;
+  optional string            status              = 10;
+  optional Mode              mode                = 11 [default = DEACTIVATED];
+  repeated StandardizedJoint standardized_joints = 12;
+}
+
+message MechanicalUnitGroup
+{
+  optional string         name             = 1;
+  optional MechanicalUnit robot            = 2;
+  repeated MechanicalUnit mechanical_units = 3;
+}
+
+//==========================================================
+//
+// RAPID task messages
+//
+//==========================================================
+
+message RAPIDModule
+{
+  optional string name = 1;
+  optional string type = 2;
+}
+
+message RAPIDTask
+{
+  enum ExecutionState
+  {
+    UNKNOWN       = 1;
+    READY         = 2;
+    STOPPED       = 3;
+    STARTED       = 4;
+    UNINITIALIZED = 5;
+  }
+
+  optional string         name            = 1;
+  optional bool           is_motion_task  = 2;
+  optional bool           is_active       = 3;
+  optional ExecutionState execution_state = 4 [default = UNKNOWN];
+  repeated RAPIDModule    modules         = 5;
+}

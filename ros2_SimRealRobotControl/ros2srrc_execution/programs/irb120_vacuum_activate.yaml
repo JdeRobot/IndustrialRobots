@@ -1,0 +1,14 @@
+Specifications:
+  Robot: "irb120"
+  EndEffector: "VacuumGripper"
+  EELink: "EE_ls_vgr"
+  Objects: ["blue_box", "red_box", "yellow_box", "green_box"]
+
+Sequence: 
+
+  - Step: 1
+    Name: "[IRB120-Demo]: Vacuum ACTIVATION"
+    Type: "VacuumGripper"
+    Action: "ACTIVATE"
+    Delay: 0.5
+

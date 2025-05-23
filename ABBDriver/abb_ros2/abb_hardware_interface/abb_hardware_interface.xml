@@ -1,0 +1,9 @@
+<library path="abb_hardware_interface">
+  <class name="abb_hardware_interface/ABBSystemHardware"
+         type="abb_hardware_interface::ABBSystemHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+		ROS 2 Control ABB driver.
+    </description>
+  </class>
+</library>

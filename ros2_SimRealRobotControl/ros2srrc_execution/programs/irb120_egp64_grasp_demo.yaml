@@ -1,0 +1,77 @@
+Specifications:
+  Robot: "irb120"
+  EndEffector: "ParallelGripper"
+  EELink: "EE_egp64"
+  Objects: ["blue_box_small", "red_box_small", "yellow_box_small", "green_box_small"]
+
+Sequence: 
+
+  - Step: 1
+    Name: "[Grasp-Demo]: MoveJ - Go to HomePosition."
+    Type: "MoveJ"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      joint1: 0.0
+      joint2: 0.0
+      joint3: 0.0
+      joint4: 0.0
+      joint5: 90.0
+      joint6: 0.0
+
+  - Step: 2
+    Name: "[Grasp-Demo]: MoveL - -0.2m in z axis."
+    Type: "MoveL"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      x: 0.15
+      y: 0.0
+      z: -0.2
+
+  - Step: 3
+    Name: "[Grasp-Demo]: MoveL - -0.1m in z axis."
+    Type: "MoveL"
+    Speed: 0.15
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.1
+      z: -0.1
+  
+  - Step: 4
+    Name: "[Grasp-Demo]: MoveL - +0.15m in x axis."
+    Type: "MoveL"
+    Speed: 0.15
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.1
+      z: -0.055
+      
+# ===== Parallel Gripper (Gazebo) - OPEN ===== #
+  - Step: 5
+    Name: "Please type the name of your program step here."
+    Type: "ParallelGripper"
+    Action: "CLOSE"
+    Value: 0.1
+    Delay: 1.0
+    
+  - Step: 6
+    Name: "[Grasp-Demo]: MoveL - +0.15m in x axis."
+    Type: "MoveL"
+    Speed: 0.2
+    Delay: 1.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: 0.2
+
+# ===== Parallel Gripper (Gazebo) - CLOSE ===== #
+  - Step: 6
+    Name: "Please type the name of your program step here."
+    Type: "ParallelGripper"
+    Action: "OPEN"
+    Delay: 1.0
+      
+

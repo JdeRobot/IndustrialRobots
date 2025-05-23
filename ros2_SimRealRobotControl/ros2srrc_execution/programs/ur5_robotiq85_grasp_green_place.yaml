@@ -1,0 +1,58 @@
+Specifications:
+  Robot: "ur5"
+  EndEffector: "ParallelGripper"
+  EELink: "EE_robotiq_2f85"
+  Objects: ["blue_sphere_small", "red_box_small", "yellow_box_small", "green_cylinder_small"]
+
+Sequence: 
+
+  - Step: 1
+    Name: "[Grasp-Demo]: MoveL to green sphere PICK point"
+    Type: "MoveL"
+    Speed: 0.8
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: 0.2
+      
+  - Step: 2
+    Name: "[Grasp-Demo]: MoveL to APROX 1 point"
+    Type: "MoveL"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      x: -0.4
+      y: 0.8
+      z: 0.0
+
+  - Step: 3
+    Name: "[Grasp-Demo]: MoveR 90º in joint 1"
+    Type: "MoveR"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      joint: "joint1"
+      value: 115.0
+      
+  - Step: 4
+    Name: "[Grasp-Demo]: MoveL to green sphere PICK point"
+    Type: "MoveL"
+    Speed: 0.8
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: -0.3
+      
+# ===== Parallel Gripper (Gazebo) - OPEN ===== #
+  - Step: 5
+    Name: "[Grasp-Demo]: Open gripper"
+    Type: "ParallelGripper"
+    Action: "OPEN"
+    Delay: 0.0
+      
+
+    
+      
+

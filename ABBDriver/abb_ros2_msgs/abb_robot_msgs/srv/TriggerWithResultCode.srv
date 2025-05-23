@@ -1,0 +1,22 @@
+#-------------------------------------------------------------------------------
+# Description:
+#   The purpose of this service definition, is to allow triggering a service
+#   where the response includes both a numerical result code and a human
+#   readable message.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Service request fields (none)
+#-------------------------------------------------------------------------------
+
+---
+
+#-------------------------------------------------------------------------------
+# Service response fields
+#-------------------------------------------------------------------------------
+# Service success/failure indicator.
+# Refer to 'abb_robot_msgs/ServiceResponses' for defined error codes.
+uint16 result_code
+
+# Informational, e.g. for error messages
+string message

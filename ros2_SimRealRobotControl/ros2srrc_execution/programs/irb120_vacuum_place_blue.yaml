@@ -1,0 +1,79 @@
+Specifications:
+  Robot: "irb120"
+  EndEffector: "VacuumGripper"
+  EELink: "EE_ls_vgr"
+  Objects: ["blue_box", "red_box", "yellow_box", "green_box"]
+
+Sequence: 
+
+  - Step: 1
+    Name: "[IRB120-Demo]: MoveL to aproximation point after pick"
+    Type: "MoveL"
+    Speed: 0.1
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: 0.2
+
+  - Step: 2
+    Name: "[IRB120-Demo]: MoveL test movement"
+    Type: "MoveL"
+    Speed: 0.8
+    Delay: 0.0
+    Input:
+      x: -0.2
+      y: -0.1
+      z: 0.1
+  
+  - Step: 3
+    Name: "[IRB120-Demo]: MoveROT in yaw +90"
+    Type: "MoveROT"
+    Speed: 0.5
+    Delay: 0.0
+    Input:
+      yaw: 90.0
+      pitch: 0.0
+      roll: 0.0
+      
+  - Step: 4
+    Name: "[IRB120-Demo]: MoveROT in yaw -180"
+    Type: "MoveROT"
+    Speed: 0.5
+    Delay: 0.0
+    Input:
+      yaw: -180.0
+      pitch: 0.0
+      roll: 0.0
+
+  - Step: 5
+    Name: "[IRB120-Demo]: MoveROT in yaw +90"
+    Type: "MoveROT"
+    Speed: 0.5
+    Delay: 0.0
+    Input:
+      yaw: 90.0
+      pitch: 0.0
+      roll: 0.0
+      
+  - Step: 6
+    Name: "[IRB120-Demo]: MoveL to aproximation point"
+    Type: "MoveL"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      x: 0.2
+      y: -0.1
+      z: -0.1
+
+  - Step: 7
+    Name: "[IRB120-Demo]: MoveL to place point at reduced speed"
+    Type: "MoveL"
+    Speed: 0.05
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.0
+      z: -0.09
+      
+

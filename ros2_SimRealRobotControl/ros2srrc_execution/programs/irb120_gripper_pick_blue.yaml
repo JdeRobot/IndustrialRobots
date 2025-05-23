@@ -1,0 +1,52 @@
+Specifications:
+  Robot: "irb120"
+  EndEffector: "ParallelGripper"
+  EELink: "EE_egp64"
+  Objects: None
+
+Sequence: 
+
+  - Step: 1
+    Name: "[IRB120-Demo]: MoveJ - Go to HomePosition."
+    Type: "MoveJ"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      joint1: 0.0
+      joint2: 0.0
+      joint3: 0.0
+      joint4: 0.0
+      joint5: 90.0
+      joint6: 0.0
+
+  - Step: 2
+    Name: "[IRB120-Demo]: MoveL - -0.2m in z axis."
+    Type: "MoveL"
+    Speed: 1.0
+    Delay: 0.0
+    Input:
+      x: 0.15
+      y: 0.0
+      z: -0.2
+
+  - Step: 3
+    Name: "[IRB120-Demo]: MoveL - -0.1m in z axis."
+    Type: "MoveL"
+    Speed: 0.15
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.1
+      z: -0.1
+  
+  - Step: 4
+    Name: "[IRB120-Demo]: MoveL - +0.15m in x axis."
+    Type: "MoveL"
+    Speed: 0.05
+    Delay: 0.0
+    Input:
+      x: 0.0
+      y: 0.1
+      z: -0.055
+      
+

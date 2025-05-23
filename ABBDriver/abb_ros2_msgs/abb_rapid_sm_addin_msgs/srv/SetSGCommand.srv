@@ -1,0 +1,57 @@
+#-------------------------------------------------------------------------------
+# Description:
+#   The purpose of this service definition, is to define a way to set the values
+#   of predefined RAPID variables for commanding a SmartGripper tool.
+#
+# Note:
+#   These variables are defined in each RAPID motion task, in ABB robot
+#   controller systems, that are using the RobotWare "StateMachine Add-In"
+#   together with a SmartGripper tool.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Enumerations
+#-------------------------------------------------------------------------------
+# Supported "StateMachine Add-In" SmartGripper commands:
+#
+# Note: These enumeration values differ from the RAPID implementation
+#       values to avoid conflict with default values in ROS messages.
+uint8 SG_COMMAND_UNKNOWN      = 1
+uint8 SG_COMMAND_NONE         = 2
+uint8 SG_COMMAND_INITIALIZE   = 3
+uint8 SG_COMMAND_CALIBRATE    = 4
+uint8 SG_COMMAND_MOVE_TO      = 5
+uint8 SG_COMMAND_GRIP_IN      = 6
+uint8 SG_COMMAND_GRIP_OUT     = 7
+uint8 SG_COMMAND_BLOW_ON_1    = 8
+uint8 SG_COMMAND_BLOW_ON_2    = 9
+uint8 SG_COMMAND_BLOW_OFF_1   = 10
+uint8 SG_COMMAND_BLOW_OFF_2   = 11
+uint8 SG_COMMAND_VACUUM_ON_1  = 12
+uint8 SG_COMMAND_VACUUM_ON_2  = 13
+uint8 SG_COMMAND_VACUUM_OFF_1 = 14
+uint8 SG_COMMAND_VACUUM_OFF_2 = 15
+
+#-------------------------------------------------------------------------------
+# Service request fields
+#-------------------------------------------------------------------------------
+# The RAPID task that runs the "StateMachine Add-In" instance.
+string task
+
+# Desired SmartGripper command.
+uint8 command
+
+# Desired target position [mm] (only used for the 'SG_COMMAND_MOVE_TO' command).
+float32 target_position
+
+---
+
+#-------------------------------------------------------------------------------
+# Service response fields
+#-------------------------------------------------------------------------------
+# Service success/failure indicator.
+# Refer to 'abb_robot_msgs/ServiceResponses' for defined error codes.
+uint16 result_code
+
+# Status message (empty if service succeeded).
+string message

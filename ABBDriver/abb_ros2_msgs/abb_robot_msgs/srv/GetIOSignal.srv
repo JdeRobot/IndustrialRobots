@@ -1,0 +1,26 @@
+#-------------------------------------------------------------------------------
+# Description:
+#   The purpose of this service definition, is to define a way to get the
+#   value of an IO-signal defined in an ABB robot controller system.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Service request fields
+#-------------------------------------------------------------------------------
+# Name of the targeted IO-signal.
+string signal
+
+---
+
+#-------------------------------------------------------------------------------
+# Service response fields
+#-------------------------------------------------------------------------------
+# Value of the IO-signal.
+string value
+
+# Service success/failure indicator.
+# Refer to 'abb_robot_msgs/ServiceResponses' for defined error codes.
+uint16 result_code
+
+# Status message (empty if service succeeded).
+string message
