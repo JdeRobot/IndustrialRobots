@@ -17,3 +17,11 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 
 # Specify locations of header files.
 include_directories(include ${catkin_INCLUDE_DIRS})
+
+catkin_install_python(PROGRAMS
+    scripts/ur5_gripper.py
+    scripts/ur5_gripper_test.py
+    scripts/ur5_pick_and_place.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY launch models rviz worlds DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
