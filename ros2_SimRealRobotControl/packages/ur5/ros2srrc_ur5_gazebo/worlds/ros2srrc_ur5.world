@@ -198,10 +198,10 @@
       <real_time>140 714367663</real_time>
       <wall_time>1749136275 247488251</wall_time>
       <iterations>139808</iterations>
-      <model name='blue_sphere_small'>
+      <model name='blue_sphere'>
         <pose>0.7 0.1 1.04 0 -0 0</pose>
         <scale>1 1 1</scale>
-        <link name='blue_sphere_small'>
+        <link name='link'>
           <pose>0.7 0.1 1.04 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>-0 -0 0 0 -0 0</acceleration>
@@ -228,14 +228,14 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='green_cylinder_small'>
+      <model name='green_cylinder'>
         <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
         <scale>1 1 1</scale>
-        <link name='green_cylinder_small'>
-          <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
+        <link name='link'>
+          <pose>0.5 -0.1 1.075 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 -9.8 0 -0 0</acceleration>
-          <wrench>0 0 -0.098 0 -0 0</wrench>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='green_target'>
@@ -268,14 +268,14 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='red_box_small'>
-        <pose>0.599998 -0.299999 1.04 -2.7e-05 -3.7e-05 0</pose>
+      <model name='red_box'>
+        <pose>0.6 -0.3 1.04 0 0 0</pose>
         <scale>1 1 1</scale>
-        <link name='red_box_small'>
-          <pose>0.599998 -0.299999 1.04 -2.7e-05 -3.7e-05 0</pose>
+        <link name='link'>
+          <pose>0.6 -0.3 1.04 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>9.8e-05 -0.000196 -0.000306 0 -0 0</acceleration>
-          <wrench>1e-06 -2e-06 -3e-06 0 -0 0</wrench>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='red_target'>
@@ -298,14 +298,14 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='yellow_box_small'>
-        <pose>0.599999 0.300001 1.05 -3.1e-05 -1.1e-05 0</pose>
+      <model name='yellow_box'>
+        <pose>0.6 0.3 1.05 0 0 0</pose>
         <scale>1 1 1</scale>
-        <link name='yellow_box_small'>
-          <pose>0.599999 0.300001 1.05 -3.1e-05 -1.1e-05 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000367 -0.000514 19.5995 0 -0 0</acceleration>
-          <wrench>4e-06 -5e-06 0.195995 0 -0 0</wrench>
+        <link name='link'>
+          <pose>0.6 0.3 1.05 0 0 0</pose>
+	  <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='yellow_target'>
@@ -1649,8 +1649,8 @@
     <audio>
       <device>default</device>
     </audio>
-    <model name='red_box_small'>
-      <link name='red_box_small'>
+    <model name='red_box'>
+      <link name='red_box'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1663,7 +1663,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='red_box_small_collision'>
+        <collision name='red_box_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
@@ -1684,7 +1684,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='red_box_small_visual'>
+        <visual name='red_box_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
@@ -1704,8 +1704,8 @@
       </link>
       <pose>0.6 -0.3 1.01 0 -0 0</pose>
     </model>
-    <model name='green_cylinder_small'>
-      <link name='green_cylinder_small'>
+    <model name='green_cylinder'>
+      <link name='green_cylinder'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1718,7 +1718,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='green_cylinder_small_collision'>
+        <collision name='green_cylinder_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -1740,7 +1740,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='green_cylinder_small_visual'>
+        <visual name='green_cylinder_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -1761,8 +1761,8 @@
       </link>
       <pose>0.5 -0.1 1.01 0 -0 0</pose>
     </model>
-    <model name='blue_sphere_small'>
-      <link name='blue_sphere_small'>
+    <model name='blue_sphere'>
+      <link name='blue_sphere'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1775,7 +1775,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='blue_sphere_small_collision'>
+        <collision name='blue_sphere_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <sphere>
@@ -1796,7 +1796,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='blue_sphere_small_visual'>
+        <visual name='blue_sphere_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <sphere>
@@ -1816,8 +1816,8 @@
       </link>
       <pose>0.7 0.1 1.01 0 -0 0</pose>
     </model>
-    <model name='yellow_box_small'>
-      <link name='yellow_box_small'>
+    <model name='yellow_box'>
+      <link name='yellow_box'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1830,7 +1830,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='yellow_box_small_collision'>
+        <collision name='yellow_box_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
@@ -1851,7 +1851,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='yellow_box_small_visual'>
+        <visual name='yellow_box_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
