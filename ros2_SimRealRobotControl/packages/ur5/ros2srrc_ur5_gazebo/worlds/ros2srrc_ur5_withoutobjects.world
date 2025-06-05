@@ -1,8 +1,9 @@
-<sdf version='1.7'>
+<?xml version="1.0" ?>
+<sdf version='1.6'>
   <world name='default'>
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
-      <pose>0 0 10 0 -0 0</pose>
+      <pose frame=''>0 0 10 0 -0 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
       <attenuation>
@@ -12,11 +13,6 @@
         <quadratic>0.001</quadratic>
       </attenuation>
       <direction>-0.5 0.1 -0.9</direction>
-      <spot>
-        <inner_angle>0</inner_angle>
-        <outer_angle>0</outer_angle>
-        <falloff>0</falloff>
-      </spot>
     </light>
     <model name='ground_plane'>
       <static>1</static>
@@ -92,11 +88,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -107,7 +103,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.95 0 -0 0</pose>
+          <pose frame=''>0 0 0.95 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.45 0.35 0.5</scale>
@@ -118,7 +114,7 @@
         <collision name='collision_0'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0.95 0 -0 0</pose>
+          <pose frame=''>0 0 0.95 0 -0 0</pose>
           <geometry>
             <box>
               <size>2.4 0.8 0.1</size>
@@ -173,13 +169,13 @@
       </link>
       <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>0.335211 0.377742 0 0 -0 0</pose>
+      <pose frame=''>0.335211 0.377742 0 0 -0 0</pose>
     </model>
     <model name='ground_logo_big'>
       <static>1</static>
       <link name='link'>
         <visual name='visual'>
-          <pose>0 0 0.001 0 -0 0</pose>
+          <pose frame=''>0 0 0.001 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
@@ -191,140 +187,100 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>-0.163565 0.817691 0 0 -0 0</pose>
+      <pose frame=''>-0.163565 0.817691 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>1415 225000000</sim_time>
-      <real_time>140 714367663</real_time>
-      <wall_time>1749136275 247488251</wall_time>
-      <iterations>139808</iterations>
-      <model name='blue_sphere_small'>
-        <pose>0.7 0.1 1.04 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='blue_sphere_small'>
-          <pose>0.7 0.1 1.04 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0 -0 0 0 -0 0</acceleration>
-          <wrench>-0 -0 0 0 -0 0</wrench>
-        </link>
-      </model>
+      <sim_time>1275 417000000</sim_time>
+      <real_time>538 186819528</real_time>
+      <wall_time>1594223523 209571631</wall_time>
+      <iterations>534891</iterations>
       <model name='blue_target'>
-        <pose>-0.6 0.45 0.755 0 -0 0</pose>
+        <pose frame=''>-0.6 0.45 0.755 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.6 0.45 0.755 0 -0 0</pose>
+          <pose frame=''>-0.6 0.45 0.755 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='conveyor'>
-        <pose>0.6 0 0 0 -0 1.57</pose>
+        <pose frame=''>0.6 0 0 0 -0 1.57</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0.6 0 0 0 -0 1.57</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='green_cylinder_small'>
-        <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
-        <scale>1 1 1</scale>
-        <link name='green_cylinder_small'>
-          <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 -9.8 0 -0 0</acceleration>
-          <wrench>0 0 -0.098 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='green_target'>
-        <pose>-0.6 -0.15 0.755 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>-0.6 -0.15 0.755 0 -0 0</pose>
+          <pose frame=''>0.6 0 0 0 -0 1.57</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_logo_big'>
-        <pose>-0.5 0 0 0 -0 1.57</pose>
+        <pose frame=''>-0.5 0 0 0 -0 1.57</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.5 0 0 0 -0 1.57</pose>
+          <pose frame=''>-0.5 0 0 0 -0 1.57</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='red_box_small'>
-        <pose>0.599998 -0.299999 1.04 -2.7e-05 -3.7e-05 0</pose>
-        <scale>1 1 1</scale>
-        <link name='red_box_small'>
-          <pose>0.599998 -0.299999 1.04 -2.7e-05 -3.7e-05 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>9.8e-05 -0.000196 -0.000306 0 -0 0</acceleration>
-          <wrench>1e-06 -2e-06 -3e-06 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='red_target'>
-        <pose>-0.6 0.15 0.755 0 -0 0</pose>
+        <pose frame=''>-0.6 0.15 0.755 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.6 0.15 0.755 0 -0 0</pose>
+          <pose frame=''>-0.6 0.15 0.755 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='target_table'>
-        <pose>-0.6 0 0 0 -0 1.57</pose>
+        <pose frame=''>-0.6 0 0 0 -0 1.57</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.6 0 0 0 -0 1.57</pose>
+          <pose frame=''>-0.6 0 0 0 -0 1.57</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='yellow_box_small'>
-        <pose>0.599999 0.300001 1.05 -3.1e-05 -1.1e-05 0</pose>
-        <scale>1 1 1</scale>
-        <link name='yellow_box_small'>
-          <pose>0.599999 0.300001 1.05 -3.1e-05 -1.1e-05 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000367 -0.000514 19.5995 0 -0 0</acceleration>
-          <wrench>4e-06 -5e-06 0.195995 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='yellow_target'>
-        <pose>-0.6 -0.45 0.755 0 -0 0</pose>
+        <pose frame=''>-0.6 -0.45 0.755 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.6 -0.45 0.755 0 -0 0</pose>
+          <pose frame=''>-0.6 -0.45 0.755 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='green_target'>
+        <pose frame=''>-0.6 -0.15 0.755 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose frame=''>-0.6 -0.15 0.755 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <light name='sun'>
-        <pose>0 0 10 0 -0 0</pose>
+        <pose frame=''>0 0 10 0 -0 0</pose>
       </light>
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>3.82249 4.74978 2.99885 -0 0.401795 -2.20437</pose>
+        <pose frame=''>3.82249 4.74978 2.99885 -0 0.401795 -2.20437</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -334,11 +290,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -349,7 +305,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.73 0 -0 1.57</pose>
+          <pose frame=''>0 0 0.73 0 -0 1.57</pose>
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
@@ -360,7 +316,7 @@
         <collision name='collision_0'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0.73 0 -0 1.57</pose>
+          <pose frame=''>0 0 0.73 0 -0 1.57</pose>
           <geometry>
             <box>
               <size>0.8 1.6 0.06</size>
@@ -415,7 +371,7 @@
       </link>
       <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>-0.877342 -1.1194 0 0 -0 0</pose>
+      <pose frame=''>-0.877342 -1.1194 0 0 -0 0</pose>
     </model>
     <model name='yellow_target'>
       <static>1</static>
@@ -423,11 +379,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -438,7 +394,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.01 0 -0 0</pose>
+          <pose frame=''>0 0 0.01 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.5 0.5 0.5</scale>
@@ -449,7 +405,7 @@
         <collision name='front_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0.144 0 0 0 -0 0</pose>
+          <pose frame=''>0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.24</size>
@@ -504,7 +460,7 @@
         <collision name='right_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 -0.144 0 0 -0 0</pose>
+          <pose frame=''>0 -0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.36</size>
@@ -559,7 +515,7 @@
         <collision name='bottom'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.3 0.025</size>
@@ -614,7 +570,7 @@
         <collision name='left_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0.144 0 0 -0 0</pose>
+          <pose frame=''>0 0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.39</size>
@@ -669,7 +625,7 @@
         <collision name='back_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>-0.144 0 0 0 -0 0</pose>
+          <pose frame=''>-0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.39</size>
@@ -722,7 +678,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-1.65226 -0.48866 0 0 -0 0</pose>
+      <pose frame=''>-1.65226 -0.48866 0 0 -0 0</pose>
     </model>
     <model name='green_target'>
       <static>1</static>
@@ -730,11 +686,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -745,7 +701,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.01 0 -0 0</pose>
+          <pose frame=''>0 0 0.01 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.5 0.5 0.5</scale>
@@ -756,7 +712,7 @@
         <collision name='front_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0.144 0 0 0 -0 0</pose>
+          <pose frame=''>0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.24</size>
@@ -811,7 +767,7 @@
         <collision name='right_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 -0.144 0 0 -0 0</pose>
+          <pose frame=''>0 -0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.36</size>
@@ -866,7 +822,7 @@
         <collision name='bottom'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.3 0.025</size>
@@ -921,7 +877,7 @@
         <collision name='left_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0.144 0 0 -0 0</pose>
+          <pose frame=''>0 0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.39</size>
@@ -976,7 +932,7 @@
         <collision name='back_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>-0.144 0 0 0 -0 0</pose>
+          <pose frame=''>-0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.39</size>
@@ -1029,7 +985,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-1.65226 -0.48866 0 0 -0 0</pose>
+      <pose frame=''>-1.65226 -0.48866 0 0 -0 0</pose>
     </model>
     <model name='red_target'>
       <static>1</static>
@@ -1037,11 +993,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -1052,7 +1008,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.01 0 -0 0</pose>
+          <pose frame=''>0 0 0.01 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.5 0.5 0.5</scale>
@@ -1063,7 +1019,7 @@
         <collision name='front_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0.144 0 0 0 -0 0</pose>
+          <pose frame=''>0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.24</size>
@@ -1118,7 +1074,7 @@
         <collision name='right_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 -0.144 0 0 -0 0</pose>
+          <pose frame=''>0 -0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.36</size>
@@ -1173,7 +1129,7 @@
         <collision name='bottom'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.3 0.025</size>
@@ -1228,7 +1184,7 @@
         <collision name='left_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0.144 0 0 -0 0</pose>
+          <pose frame=''>0 0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.39</size>
@@ -1283,7 +1239,7 @@
         <collision name='back_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>-0.144 0 0 0 -0 0</pose>
+          <pose frame=''>-0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.39</size>
@@ -1336,7 +1292,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-0.055993 0.310239 0 0 -0 0</pose>
+      <pose frame=''>-0.055993 0.310239 0 0 -0 0</pose>
     </model>
     <model name='blue_target'>
       <static>1</static>
@@ -1344,11 +1300,11 @@
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <gravity>1</gravity>
         <inertial>
           <mass>1</mass>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -1359,7 +1315,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0.01 0 -0 0</pose>
+          <pose frame=''>0 0 0.01 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.5 0.5 0.5</scale>
@@ -1370,7 +1326,7 @@
         <collision name='front_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0.144 0 0 0 -0 0</pose>
+          <pose frame=''>0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.24</size>
@@ -1425,7 +1381,7 @@
         <collision name='right_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 -0.144 0 0 -0 0</pose>
+          <pose frame=''>0 -0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.36</size>
@@ -1480,7 +1436,7 @@
         <collision name='bottom'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 -0 0</pose>
+          <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.3 0.025</size>
@@ -1535,7 +1491,7 @@
         <collision name='left_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0.144 0 0 -0 0</pose>
+          <pose frame=''>0 0.144 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.3 0.012 0.39</size>
@@ -1590,7 +1546,7 @@
         <collision name='back_wall'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>-0.144 0 0 0 -0 0</pose>
+          <pose frame=''>-0.144 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.012 0.3 0.39</size>
@@ -1643,233 +1599,13 @@
           </surface>
         </collision>
       </link>
-      <pose>-1.18752 -1.7319 0 0 -0 0</pose>
+      <pose frame=''>-1.18752 -1.7319 0 0 -0 0</pose>
     </model>
-    <plugin name='gazebo_link_attacher' filename='libgazebo_link_attacher.so'/>
-    <audio>
-      <device>default</device>
-    </audio>
-    <model name='red_box_small'>
-      <link name='red_box_small'>
-        <inertial>
-          <pose>0 0 0 0 -0 0</pose>
-          <mass>0.01</mass>
-          <inertia>
-            <ixx>0</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0</iyy>
-            <iyz>0</iyz>
-            <izz>0</izz>
-          </inertia>
-        </inertial>
-        <collision name='red_box_small_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.05 0.1 0.08</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='red_box_small_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.05 0.1 0.08</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Red</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.6 -0.3 1.01 0 -0 0</pose>
-    </model>
-    <model name='green_cylinder_small'>
-      <link name='green_cylinder_small'>
-        <inertial>
-          <pose>0 0 0 0 -0 0</pose>
-          <mass>0.01</mass>
-          <inertia>
-            <ixx>0</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0</iyy>
-            <iyz>0</iyz>
-            <izz>0</izz>
-          </inertia>
-        </inertial>
-        <collision name='green_cylinder_small_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <length>0.15</length>
-              <radius>0.03</radius>
-            </cylinder>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='green_cylinder_small_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <length>0.15</length>
-              <radius>0.03</radius>
-            </cylinder>
-          </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Green</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.5 -0.1 1.01 0 -0 0</pose>
-    </model>
-    <model name='blue_sphere_small'>
-      <link name='blue_sphere_small'>
-        <inertial>
-          <pose>0 0 0 0 -0 0</pose>
-          <mass>0.01</mass>
-          <inertia>
-            <ixx>0</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0</iyy>
-            <iyz>0</iyz>
-            <izz>0</izz>
-          </inertia>
-        </inertial>
-        <collision name='blue_sphere_small_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.04</radius>
-            </sphere>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='blue_sphere_small_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.04</radius>
-            </sphere>
-          </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Blue</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.7 0.1 1.01 0 -0 0</pose>
-    </model>
-    <model name='yellow_box_small'>
-      <link name='yellow_box_small'>
-        <inertial>
-          <pose>0 0 0 0 -0 0</pose>
-          <mass>0.01</mass>
-          <inertia>
-            <ixx>0</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0</iyy>
-            <iyz>0</iyz>
-            <izz>0</izz>
-          </inertia>
-        </inertial>
-        <collision name='yellow_box_small_collision'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.05 0.07 0.1</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <friction>
-              <ode/>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='yellow_box_small_visual'>
-          <pose>0 0 0 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size>0.08 0.04 0.1</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Yellow</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.6 0.3 1.01 0 -0 0</pose>
-    </model>
+
+
+
+    <!-- Link Attacher: GAZEBO PLUGIN -->
+    <plugin name="gazebo_link_attacher" filename="libgazebo_link_attacher.so"/>
+
   </world>
 </sdf>
