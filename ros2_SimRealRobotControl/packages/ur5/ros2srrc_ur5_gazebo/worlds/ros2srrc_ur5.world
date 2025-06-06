@@ -201,7 +201,7 @@
       <model name='blue_sphere'>
         <pose>0.7 0.1 1.04 0 -0 0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
+        <link name='blue_sphere'>
           <pose>0.7 0.1 1.04 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>-0 -0 0 0 -0 0</acceleration>
@@ -231,7 +231,7 @@
       <model name='green_cylinder'>
         <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
+        <link name='green_cylinder'>
           <pose>0.5 -0.1 1.075 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
@@ -271,7 +271,7 @@
       <model name='red_box'>
         <pose>0.6 -0.3 1.04 0 0 0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
+        <link name='red_box'>
           <pose>0.6 -0.3 1.04 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
@@ -301,7 +301,7 @@
       <model name='yellow_box'>
         <pose>0.6 0.3 1.05 0 0 0</pose>
         <scale>1 1 1</scale>
-        <link name='link'>
+        <link name='yellow_box'>
           <pose>0.6 0.3 1.05 0 0 0</pose>
 	  <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
