@@ -101,7 +101,7 @@ def GetEEctr(EEName):
     
     RESULT = []
 
-    PATH = os.path.join('/home', 'dev_ws', 'src', 'IndustrialRobots', 'ros2_SimRealRobotControl', 'ros2srrc_endeffectors', EEName, 'config')
+    PATH = os.path.join(os.path.expanduser('~'), 'dev_ws', 'src', 'IndustrialRobots', 'ros2_SimRealRobotControl', 'ros2srrc_endeffectors', EEName, 'config')
     YAML_PATH = PATH + "/controller_moveit2.yaml"
     
     with open(YAML_PATH, 'r') as YAML:
@@ -115,7 +115,7 @@ def GetEEctr(EEName):
 # CHECK if CONTROLLER file exists for EE:
 def EEctrlEXISTS(EEName):
     
-    PATH = os.path.join('/home', 'dev_ws', 'src', 'IndustrialRobots', 'ros2_SimRealRobotControl', 'ros2srrc_endeffectors', EEName, 'config')
+    PATH = os.path.join(os.path.expanduser('~'), 'dev_ws', 'src', 'IndustrialRobots', 'ros2_SimRealRobotControl', 'ros2srrc_endeffectors', EEName, 'config')
     YAML_PATH = PATH + "/controller.yaml"
     
     RES = os.path.exists(YAML_PATH)
