@@ -157,7 +157,7 @@ def generate_launch_description():
     # === INPUT ARGUMENT: CONFIGURATION === #
     # CONFIG = AssignArgument("config")
     # DMM fixed UR5 + Robotiq 85
-    CONFIG = "ur5_2"
+    CONFIG = "ur5_3"
     CONFIGURATION = GetCONFIG(CONFIG, PKG_PATH)
 
     if CONFIGURATION["Success"] == False:
@@ -365,11 +365,8 @@ def generate_launch_description():
 
     # RVIZ:
     rviz_base = os.path.join(get_package_share_directory(PACKAGE_NAME + "_moveit2"), "config")
-    if EE == "false":
-        rviz_full_config = os.path.join(rviz_base, CONFIGURATION["rob"] + "_moveit2.rviz")
-    else:
-        rviz_full_config = os.path.join(rviz_base, CONFIGURATION["rob"] + CONFIGURATION["ee"] + "_moveit2.rviz")
-
+    rviz_full_config = os.path.join(rviz_base + "/ur5robotiq_2f85_moveit2.rviz")
+    
     rviz_node_full = Node(
         package="rviz2",
         executable="rviz2",
@@ -515,6 +512,26 @@ def generate_launch_description():
             )
         )
     )
+
+    # LD.add_action(RegisterEventHandler(
+    #     OnProcessExit(
+    #         target_action = spawn_entity,
+    #         on_exit = [
+    #             TimerAction(
+    #                 period=3.0,
+    #                 actions=[
+    #                     Node(
+    #                         package='ros2srrc_ur5_gazebo',
+    #                         executable='model_manager.py',  # or just 'model_manager' if installed via setup.py
+    #                         name='spawn_objects',
+    #                         output='screen'
+    #                     )
+    #                 ]
+    #             )
+    #         ]
+    #     )
+    # ))
+
 
     # ***** RETURN  ***** #
     return(LD)

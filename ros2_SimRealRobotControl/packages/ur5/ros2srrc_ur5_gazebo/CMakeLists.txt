@@ -34,6 +34,8 @@ endif()
 
 install(
   DIRECTORY 
+    meshes
+    models
     config
     urdf 
     worlds
