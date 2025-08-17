@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypology="compact"?>
+<package format="3">
+  <name>pcl_filter</name>
+  <version>0.0.0</version>
+  <description>PCL filtering and object detection package for ROS2</description>
+  <maintainer email="your.email@example.com">Your Name</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>pcl_conversions</depend>
+  <depend>cv_bridge</depend>
+
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+  
+  <exec_depend>libpcl-all</exec_depend>
+  <exec_depend>libopencv-core-dev</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+  <member_of_group>rosidl_interface_packages</member_of_group>
+</package>
