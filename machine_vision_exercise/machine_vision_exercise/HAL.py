@@ -53,7 +53,7 @@ from ros2srrc_data.msg import Robpose
 
 # TODO: Replace with appropriate ROS2 equivalents for perception
 # These would need to be converted to ROS2 message types
-# from pcl_filter_msgs.msg import ColorFilter, ShapeFilter
+from pcl_filter_msgs.msg import ColorFilter, ShapeFilter
 
 # Initialization
 rclpy.init(args=None)
@@ -377,24 +377,80 @@ def GripperSet(relative_closure, wait_time):
 
 #################################### PERCEPTION FUNCTIONS ###################################################
 
-class PerceptionManager(Node):
-    """ROS2 Node for handling perception-related functionality"""
-    
+#!/usr/bin/env python3
+
+import os
+import yaml
+import math
+import copy
+import numpy
+import rospkg
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Pose, Point, Quaternion, PoseStamped
+from std_msgs.msg import String, Bool
+from tf_transformations import quaternion_from_euler, euler_from_quaternion
+import tf2_ros
+from tf2_geometry_msgs import tf2_geometry_msgs
+
+# Custom message types - you'll need to define these in your ROS2 package
+# from your_package.msg import ColorFilter, ShapeFilter
+
+
+class Object:
+    def __init__(self, relative_pose, abs_pose, height, width, length, shape, color):
+        self.relative_pose = relative_pose
+        self.abs_pose = abs_pose
+        self.height = height
+        self.width = width
+        self.length = length
+        self.shape = shape
+        self.color = color
+
+
+class WorkSpace:
+    def __init__(self, x, y, z, min_r, max_r, min_z):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.min_r = min_r
+        self.max_r = max_r
+        self.min_z = min_z
+
+
+class Pick_Place(Node):
     def __init__(self):
-        super().__init__('perception_manager')
+        super().__init__('pick_place_node')
         
-        # TODO: Replace with appropriate ROS2 message types and topic names
-        # These publishers would need to be adapted to your specific ROS2 perception setup
+        # Initialize object and goal lists
+        self.object_list = {}
+        self.goal_list = {}
+        # Find the base directory of your package (install/share)
+        pkg_path = get_package_share_directory("machine_vision_exercise")
+
+        # Build the path down into src/rqt_vacuum_gripper/interfaces/models_info.yaml
+        self.filename = os.path.join(pkg_path, "config", "models_info.yaml")
         
-        # Publishers for perception control
-        # self.color_filter_pub = self.create_publisher(ColorFilter, '/start_color_filter', 10)
-        # self.shape_filter_pub = self.create_publisher(ShapeFilter, '/start_shape_filter', 10)
+        # Load object information
+        self._load_objects_info()
+        self._set_target_info()
         
-        # Publishers for GUI/debugging
+        # Set up publishers
         self.message_pub = self.create_publisher(String, '/gui_message', 10)
         self.updatepose_pub = self.create_publisher(Bool, '/updatepose', 10)
         
-        # Color and shape converter for numerical representation
+        # Uncomment these when you have the custom message types defined
+        # self.color_filter_pub = self.create_publisher(ColorFilter, '/start_color_filter', 10)
+        # self.shape_filter_pub = self.create_publisher(ShapeFilter, '/start_shape_filter', 10)
+        
+        # Set up TF2 buffer and listener
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        
+        # Load workspace configuration
+        self._get_workspace()
+        
+        # Color and shape converters
         self.color_shape_converter = {
             "red": 1,
             "green": 2,
@@ -404,235 +460,302 @@ class PerceptionManager(Node):
             "cylinder": 2
         }
         
-        # Object detection results storage
-        self.detected_objects = {}
-        
-        print("Perception Manager initialized")
-    
+        self.get_logger().info('Pick_Place node initialized')
+
+    def _load_objects_info(self):
+        """Load object information from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                objects_info = yaml.safe_load(file)
+                
+                # Get robot pose
+                robot_x = objects_info["robot"]["pose"]["x"]
+                robot_y = objects_info["robot"]["pose"]["y"]
+                robot_z = objects_info["robot"]["pose"]["z"]
+                robot_roll = objects_info["robot"]["pose"]["roll"]
+                robot_pitch = objects_info["robot"]["pose"]["pitch"]
+                robot_yaw = objects_info["robot"]["pose"]["yaw"]
+                
+                # Process objects
+                objects = objects_info["objects"]
+                for object_name, obj_data in objects.items():
+                    name = object_name
+                    shape = obj_data["shape"]
+                    color = obj_data["color"]
+                    
+                    # Object pose
+                    x = obj_data["pose"]["x"]
+                    y = obj_data["pose"]["y"]
+                    z = obj_data["pose"]["z"]
+                    roll = obj_data["pose"]["roll"]
+                    pitch = obj_data["pose"]["pitch"]
+                    yaw = obj_data["pose"]["yaw"]
+                    
+                    object_pose = self.pose2msg(roll, pitch, yaw, x, y, z)
+                    
+                    # Create relative pose
+                    p = Pose()
+                    p.position.x = x - robot_x
+                    p.position.y = y - robot_y
+                    p.position.z = z - robot_z
+                    
+                    q = quaternion_from_euler(roll, pitch, yaw)
+                    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+                    
+                    # Handle different shapes
+                    if shape == "box":
+                        size_x = obj_data["size"]["x"]
+                        size_y = obj_data["size"]["y"]
+                        size_z = obj_data["size"]["z"]
+                        p.position.z += size_z / 2
+                        
+                        height = size_z
+                        width = size_y
+                        length = size_x
+                        self.object_list[name] = Object(p, object_pose, height, width, length, shape, color)
+                        
+                    elif shape == "cylinder":
+                        height = obj_data["size"]["height"]
+                        radius = obj_data["size"]["radius"]
+                        p.position.z += height / 2
+                        self.object_list[name] = Object(p, object_pose, height, radius*2, radius*2, shape, color)
+                        
+                    elif shape == "sphere":
+                        radius = obj_data["size"]
+                        p.position.z += radius
+                        self.object_list[name] = Object(p, object_pose, radius*2, radius*2, radius*2, shape, color)
+                        
+        except FileNotFoundError:
+            self.get_logger().error(f'Could not find models_info.yaml file at {filename}')
+        except Exception as e:
+            self.get_logger().error(f'Error loading objects info: {str(e)}')
+
+    def _set_target_info(self):
+        """Load target information from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                objects_info = yaml.safe_load(file)
+                
+                robot_x = objects_info["robot"]["pose"]["x"]
+                robot_y = objects_info["robot"]["pose"]["y"]
+                robot_z = objects_info["robot"]["pose"]["z"]
+                
+                targets = objects_info["targets"]
+                for name, target_data in targets.items():
+                    position = Point()
+                    position.x = target_data["x"] - robot_x
+                    position.y = target_data["y"] - robot_y
+                    position.z = target_data["z"] - robot_z
+                    self.goal_list[name] = position
+                    
+        except Exception as e:
+            self.get_logger().error(f'Error loading target info: {str(e)}')
+
+    def _get_workspace(self):
+        """Load workspace configuration from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                joints_setup = yaml.safe_load(file)
+                workspace = joints_setup["workspace"]
+                
+                x = workspace["center"]["x"]
+                y = workspace["center"]["y"]
+                z = workspace["center"]["z"]
+                min_r = workspace["r"]["min"]
+                max_r = workspace["r"]["max"]
+                min_z = workspace["min_z"]
+                self.workspace = WorkSpace(x, y, z, min_r, max_r, min_z)
+                
+        except Exception as e:
+            self.get_logger().error(f'Error loading workspace config: {str(e)}')
+
+    # Publisher methods
     def send_message(self, message):
-        """Send message to GUI/debugging system"""
+        """Send a message via ROS2 publisher"""
         msg = String()
         msg.data = message
         self.message_pub.publish(msg)
-        print(f"GUI Message: {message}")
-    
+        
     def updatepose_trigger(self, value):
         """Trigger pose update"""
         msg = Bool()
         msg.data = value
         self.updatepose_pub.publish(msg)
 
-# Global perception manager instance
-_perception_manager = None
+    # Uncomment these methods when you have the custom message types defined
 
-def _get_perception_manager():
-    """Get or create the global perception manager instance"""
-    global _perception_manager
-    if _perception_manager is None:
-        _perception_manager = PerceptionManager()
-    return _perception_manager
+    def start_color_filter(self, color, rmax, rmin, gmax, gmin, bmax, bmin):
+        color_filter = ColorFilter()
+        color_filter.color = self.color_shape_converter[color]
+        color_filter.rmax = rmax
+        color_filter.rmin = rmin
+        color_filter.gmax = gmax
+        color_filter.gmin = gmin
+        color_filter.bmax = bmax
+        color_filter.bmin = bmin
+        color_filter.status = True
+        self.color_filter_pub.publish(color_filter)
 
-def start_color_filter(color, rmax, rmin, gmax, gmin, bmax, bmin):
-    """
-    Start color-based object detection/filtering
-    
-    Args:
-        color (str): Color name ('red', 'green', 'blue', 'yellow')
-        rmax, rmin (int): Red channel max/min values (0-255)
-        gmax, gmin (int): Green channel max/min values (0-255)
-        bmax, bmin (int): Blue channel max/min values (0-255)
-    """
-    perception_mgr = _get_perception_manager()
-    
-    # TODO: Replace with actual ROS2 ColorFilter message
-    # color_filter = ColorFilter()
-    # color_filter.color = perception_mgr.color_shape_converter[color]
-    # color_filter.rmax = rmax
-    # color_filter.rmin = rmin
-    # color_filter.gmax = gmax
-    # color_filter.gmin = gmin
-    # color_filter.bmax = bmax
-    # color_filter.bmin = bmin
-    # color_filter.status = True
-    # perception_mgr.color_filter_pub.publish(color_filter)
-    
-    print(f"Starting color filter for {color} with RGB ranges:")
-    print(f"  Red: {rmin}-{rmax}, Green: {gmin}-{gmax}, Blue: {bmin}-{bmax}")
-    perception_mgr.send_message(f"Color filter started for {color}")
+    def stop_color_filter(self, color):
+        color_filter = ColorFilter()
+        color_filter.color = self.color_shape_converter[color]
+        color_filter.status = False
+        self.color_filter_pub.publish(color_filter)
 
-def stop_color_filter(color):
-    """
-    Stop color-based object detection/filtering
-    
-    Args:
-        color (str): Color name to stop filtering
-    """
-    perception_mgr = _get_perception_manager()
-    
-    # TODO: Replace with actual ROS2 ColorFilter message
-    # color_filter = ColorFilter()
-    # color_filter.color = perception_mgr.color_shape_converter[color]
-    # color_filter.status = False
-    # perception_mgr.color_filter_pub.publish(color_filter)
-    
-    print(f"Stopping color filter for {color}")
-    perception_mgr.send_message(f"Color filter stopped for {color}")
+    def start_shape_filter(self, color, shape, radius):
+        shape_filter = ShapeFilter()
+        shape_filter.color = self.color_shape_converter[color]
+        shape_filter.shape = self.color_shape_converter[shape]
+        shape_filter.radius = radius
+        shape_filter.status = True
+        self.shape_filter_pub.publish(shape_filter)
 
-def start_shape_filter(color, shape, radius):
-    """
-    Start shape-based object detection/filtering
+    def stop_shape_filter(self, color, shape):
+        shape_filter = ShapeFilter()
+        shape_filter.color = self.color_shape_converter[color]
+        shape_filter.shape = self.color_shape_converter[shape]
+        shape_filter.status = False
+        self.shape_filter_pub.publish(shape_filter)
     
-    Args:
-        color (str): Color name ('red', 'green', 'blue', 'yellow')
-        shape (str): Shape name ('sphere', 'cylinder')
-        radius (float): Detection radius parameter
-    """
-    perception_mgr = _get_perception_manager()
-    
-    # TODO: Replace with actual ROS2 ShapeFilter message
-    # shape_filter = ShapeFilter()
-    # shape_filter.color = perception_mgr.color_shape_converter[color]
-    # shape_filter.shape = perception_mgr.color_shape_converter[shape]
-    # shape_filter.radius = radius
-    # shape_filter.status = True
-    # perception_mgr.shape_filter_pub.publish(shape_filter)
-    
-    print(f"Starting shape filter for {color} {shape} with radius {radius}")
-    perception_mgr.send_message(f"Shape filter started for {color} {shape}")
 
-def stop_shape_filter(color, shape):
-    """
-    Stop shape-based object detection/filtering
-    
-    Args:
-        color (str): Color name
-        shape (str): Shape name
-    """
-    perception_mgr = _get_perception_manager()
-    
-    # TODO: Replace with actual ROS2 ShapeFilter message
-    # shape_filter = ShapeFilter()
-    # shape_filter.color = perception_mgr.color_shape_converter[color]
-    # shape_filter.shape = perception_mgr.color_shape_converter[shape]
-    # shape_filter.status = False
-    # perception_mgr.shape_filter_pub.publish(shape_filter)
-    
-    print(f"Stopping shape filter for {color} {shape}")
-    perception_mgr.send_message(f"Shape filter stopped for {color} {shape}")
+    # Getter methods
+    def get_object_list(self):
+        """Get list of object names"""
+        return list(self.object_list.keys())
 
-def get_object_position(object_name):
-    """
-    Get the detected position of an object
-    
-    Args:
-        object_name (str): Name of the object to locate
+    def get_target_list(self):
+        """Get list of target names"""
+        return list(self.goal_list.keys())
+
+    def get_object_pose(self, object_name):
+        """Get pose of specific object"""
+        if object_name in self.object_list:
+            return copy.deepcopy(self.object_list[object_name].relative_pose)
+        else:
+            self.get_logger().warn(f'Object {object_name} not found')
+            return None
+
+    def get_object_info(self, object_name):
+        """Get complete info of specific object"""
+        if object_name in self.object_list:
+            this_object = copy.deepcopy(self.object_list[object_name])
+            return (this_object.height, this_object.width, this_object.length, 
+                   this_object.shape, this_object.color)
+        else:
+            self.get_logger().warn(f'Object {object_name} not found')
+            return None
         
-    Returns:
-        Point: Object position (x, y, z) or None if not found
-    """
-    perception_mgr = _get_perception_manager()
-    
-    # TODO: Implement actual object position detection using ROS2 TF2
-    # This would typically involve:
-    # 1. Using tf2_ros.Buffer and tf2_ros.TransformListener
-    # 2. Looking up transform from world/base frame to object frame
-    # 3. Converting to Point message
-    
-    print(f"Attempting to get position for object: {object_name}")
-    
-    # Placeholder implementation - replace with actual tf2 lookup
-    try:
-        # In a real implementation, you would use something like:
-        # transform = self.tf_buffer.lookup_transform('world', object_name, rclpy.time.Time())
-        # position = Point()
-        # position.x = transform.transform.translation.x
-        # position.y = transform.transform.translation.y
-        # position.z = transform.transform.translation.z
-        
-        # For now, return None to indicate object not found
-        print(f"Object {object_name} not currently detected")
-        return None
-        
-    except Exception as e:
-        print(f"Error getting object position: {e}")
-        return None
+    def get_object_position(self, object_name):
+        """Get object position using TF2 transform lookup"""
+        frame_id = object_name
+        try:
+            # Lookup transform from world to object frame
+            transform = self.tf_buffer.lookup_transform(
+                'world', 
+                frame_id, 
+                rclpy.time.Time(),
+                timeout=rclpy.duration.Duration(seconds=1.0)
+            )
+            
+            # Extract translation
+            trans = transform.transform.translation
+            
+            position = Point()
+            position.x = trans.x
+            position.y = trans.y
+            position.z = trans.z
+            
+            print("*************************************")
+            print("Detected position of " + object_name + ":")
+            print([trans.x, trans.y, trans.z])
+            print("*************************************")
+            
+            return position
+            
+        except Exception as e:
+            self.get_logger().info("Cannot find desired object: " + str(e))
+            return None
 
-def detect_objects_by_color(color):
-    """
-    Detect all objects of a specific color
-    
-    Args:
-        color (str): Color to detect ('red', 'green', 'blue', 'yellow')
-        
-    Returns:
-        list: List of detected object names
-    """
-    print(f"Detecting objects with color: {color}")
-    
-    # TODO: Implement actual color-based object detection
-    # This would typically involve:
-    # 1. Processing camera/point cloud data
-    # 2. Applying color filters
-    # 3. Extracting object poses
-    # 4. Publishing detected objects to TF tree
-    
-    detected = []
-    perception_mgr = _get_perception_manager()
-    perception_mgr.send_message(f"Scanning for {color} objects...")
-    
-    # Placeholder - in real implementation, this would return actual detected objects
-    return detected
 
-def detect_objects_by_shape(shape):
-    """
-    Detect all objects of a specific shape
-    
-    Args:
-        shape (str): Shape to detect ('sphere', 'cylinder', 'box')
-        
-    Returns:
-        list: List of detected object names
-    """
-    print(f"Detecting objects with shape: {shape}")
-    
-    # TODO: Implement actual shape-based object detection
-    # This would involve point cloud processing and geometric analysis
-    
-    detected = []
-    perception_mgr = _get_perception_manager()
-    perception_mgr.send_message(f"Scanning for {shape} objects...")
-    
-    # Placeholder - in real implementation, this would return actual detected objects
-    return detected
+    def get_target_position(self, target_name):
+        """Get position of specific target"""
+        if target_name in self.goal_list:
+            return self.goal_list[target_name]
+        else:
+            self.get_logger().warn(f'Target {target_name} not found')
+            return None
 
-def scan_workspace():
-    """
-    Perform a comprehensive scan of the workspace to detect all objects
-    
-    Returns:
-        dict: Dictionary of detected objects with their properties
-    """
-    print("Starting workspace scan...")
-    perception_mgr = _get_perception_manager()
-    perception_mgr.send_message("Building object map...")
-    
-    # TODO: Implement comprehensive workspace scanning
-    # This might involve:
-    # 1. Moving robot to scanning positions
-    # 2. Capturing multiple viewpoints
-    # 3. Processing point cloud data
-    # 4. Identifying and classifying objects
-    # 5. Building object database
-    
-    detected_objects = {}
-    
-    # Placeholder implementation
-    time.sleep(1)  # Simulate scanning time
-    
-    perception_mgr.send_message("Workspace scan completed")
-    print("Workspace scan completed")
-    
-    return detected_objects
+    # Utility methods for pose conversion
+    def pose2msg(self, roll, pitch, yaw, x, y, z):
+        """Convert roll, pitch, yaw, x, y, z to Pose message"""
+        pose = Pose()
+        quat = quaternion_from_euler(roll, pitch, yaw)
+        pose.orientation.x = quat[0]
+        pose.orientation.y = quat[1]
+        pose.orientation.z = quat[2]
+        pose.orientation.w = quat[3]
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = z
+        return pose
+
+    def msg2pose(self, pose):
+        """Convert Pose message to roll, pitch, yaw, x, y, z"""
+        x = pose.position.x
+        y = pose.position.y
+        z = pose.position.z
+        quaternion = (pose.orientation.x,
+                      pose.orientation.y,
+                      pose.orientation.z,
+                      pose.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+        roll = euler[0]
+        pitch = euler[1]
+        yaw = euler[2]
+        return roll, pitch, yaw, x, y, z
+
+    def pose2msg_deg(self, roll, pitch, yaw, x, y, z):
+        """Convert degrees to Pose message"""
+        pose = Pose()
+        quat = quaternion_from_euler(numpy.deg2rad(roll), 
+                                   numpy.deg2rad(pitch), 
+                                   numpy.deg2rad(yaw))
+        pose.orientation.x = quat[0]
+        pose.orientation.y = quat[1]
+        pose.orientation.z = quat[2]
+        pose.orientation.w = quat[3]
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = z
+        return pose
+
+    def msg2pose_deg(self, pose):
+        """Convert Pose message to degrees"""
+        x = pose.position.x
+        y = pose.position.y
+        z = pose.position.z
+        quaternion = (pose.orientation.x,
+                      pose.orientation.y,
+                      pose.orientation.z,
+                      pose.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+        roll = numpy.rad2deg(euler[0])
+        pitch = numpy.rad2deg(euler[1])
+        yaw = numpy.rad2deg(euler[2])
+        return roll, pitch, yaw, x, y, z
+
+    # Workspace validation
+    def is_inside_workspace(self, x, y, z):
+        """Check if position is inside workspace"""
+        if z > self.workspace.min_z:
+            dx = x - self.workspace.x
+            dy = y - self.workspace.y
+            dz = z - self.workspace.z
+            r = math.sqrt(dx**2 + dy**2 + dz**2)
+            if self.workspace.min_r < r < self.workspace.max_r:
+                return True
+        return False
+
 
 #################################### UTILITY FUNCTIONS ###################################################
 
@@ -810,7 +933,6 @@ def load_objects():
 
     # Build the path down into src/rqt_vacuum_gripper/interfaces/models_info.yaml
     filename = os.path.join(pkg_path, "config", "models_info.yaml")
-    print(filename)
 
     object_list = {}
     goal_list = {}

@@ -106,7 +106,7 @@ public:
     // Initialize color ranges with default values
     assign_color_range(red_range, 255, 200, 100, 0, 100, 0);
     assign_color_range(green_range, 100, 0, 255, 200, 100, 0);
-    assign_color_range(blue_range, 100, 0, 100, 0, 255, 200);
+    assign_color_range(blue_range, 255, 0, 255, 0, 255, 30); 
     assign_color_range(yellow_range, 255, 200, 255, 200, 100, 0);
 
     RCLCPP_INFO(this->get_logger(), "Object Detection Node Started");
@@ -119,16 +119,16 @@ public:
     if(req->data == true){
       // Start all color filters with default parameters
       sub_red = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-          "/kinect_camera_fixed/depth/points", 1, 
+          "/base_camera/points", 1, 
           std::bind(&ObjectDetection::redfilter_callback, this, std::placeholders::_1));
       sub_green = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-          "/kinect_camera_fixed/depth/points", 1, 
+          "/base_camera/points", 1, 
           std::bind(&ObjectDetection::greenfilter_callback, this, std::placeholders::_1));
       sub_blue = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-          "/kinect_camera_fixed/depth/points", 1, 
+          "/base_camera/points", 1, 
           std::bind(&ObjectDetection::bluefilter_callback, this, std::placeholders::_1));
       sub_yellow = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-          "/kinect_camera_fixed/depth/points", 1, 
+          "/base_camera/points", 1, 
           std::bind(&ObjectDetection::yellowfilter_callback, this, std::placeholders::_1));
       res->success = true;
       res->message = "Color filters started";
@@ -230,9 +230,26 @@ public:
   }
 
   void bluefilter_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
-  {
+{
+    RCLCPP_INFO(this->get_logger(), "=== BLUE FILTER CALLBACK CALLED ===");
+    
     PointCloudRGB::Ptr cloud_input(new PointCloudRGB);
     pcl::fromROSMsg(*msg, *cloud_input);
+    
+    RCLCPP_INFO(this->get_logger(), "Input cloud size: %zu", cloud_input->points.size());
+    
+    // Sample first few points to see actual RGB values
+    for(size_t i = 0; i < std::min(cloud_input->points.size(), size_t(10)); i++) {
+        auto& pt = cloud_input->points[i];
+        if(!std::isnan(pt.x)) {
+            RCLCPP_INFO(this->get_logger(), "Point %zu: r=%d, g=%d, b=%d", i, pt.r, pt.g, pt.b);
+        }
+    }
+    
+    RCLCPP_INFO(this->get_logger(), "Blue range: r(%d-%d), g(%d-%d), b(%d-%d)", 
+                blue_range.rMin, blue_range.rMax, 
+                blue_range.gMin, blue_range.gMax, 
+                blue_range.bMin, blue_range.bMax);
     
     PointCloudRGB::Ptr cloud_color_filtered(new PointCloudRGB);
 
@@ -251,12 +268,16 @@ public:
     color_filter.setCondition (color_cond);
     color_filter.filter(*cloud_color_filtered);
 
+    RCLCPP_INFO(this->get_logger(), "Filtered cloud size: %zu", cloud_color_filtered->points.size());
+
     sensor_msgs::msg::PointCloud2 output_msg;
     pcl::toROSMsg(*cloud_color_filtered, output_msg);
     output_msg.header = msg->header;
     pub_blue->publish(output_msg);
     pointcloud_to_rgb_image(cloud_color_filtered, image_pub_blue, msg->header);
-  }
+    
+    RCLCPP_INFO(this->get_logger(), "=== END BLUE FILTER DEBUG ===");
+}
 
   void redfilter_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
   {
