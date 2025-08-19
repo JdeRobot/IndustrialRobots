@@ -1176,7 +1176,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>0.4 0.25 1.01 0 -0 0</pose>
+      <pose>0.45 0.25 1.01 0 -0 0</pose>
     </model>
 
 
@@ -1233,7 +1233,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>0.4 -0.25 1.01 0 -0 0</pose>
+      <pose>0.45 -0.25 1.01 0 -0 0</pose>
     </model>
 
    
@@ -1293,8 +1293,8 @@
       <pose>0.45 0.09 1.01 0 -0 0</pose>
     </model>
 
-    <model name='yellow_sphere'>
-      <link name='yellow_sphere'>
+    <model name='purple_sphere'>
+      <link name='purple_sphere'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1307,7 +1307,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='yellow_sphere_collision'>
+        <collision name='purple_sphere_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <sphere>
@@ -1328,7 +1328,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='red_sphere_visual'>
+        <visual name='purple_sphere_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <sphere>
@@ -1337,7 +1337,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Yellow</name>
+              <name>Gazebo/Purple</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
           </material>
@@ -1411,8 +1411,8 @@
       <pose>0.65 -0.09 1.01 0 -0 0</pose>
     </model>
 
-    <model name='yellow_cylinder'>
-      <link name='yellow_cylinder'>
+    <model name='purple_cylinder'>
+      <link name='purple_cylinder'>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
           <mass>0.01</mass>
@@ -1425,7 +1425,7 @@
             <izz>0</izz>
           </inertia>
         </inertial>
-        <collision name='yellow_cylinder_collision'>
+        <collision name='purple_cylinder_collision'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -1447,7 +1447,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='yellow_cylinder_visual'>
+        <visual name='purple_cylinder_visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -1457,7 +1457,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Yellow</name>
+              <name>Gazebo/Purple</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
           </material>
@@ -1546,7 +1546,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.04</radius>
+              <radius>0.03</radius>
               <length>0.07</length>
             </cylinder>
           </geometry>
@@ -1568,7 +1568,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.04</radius>
+              <radius>0.03</radius>
               <length>0.07</length>
             </cylinder>
           </geometry>

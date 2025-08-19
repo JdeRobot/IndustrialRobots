@@ -20,8 +20,8 @@ find_package(pcl_conversions REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 
-# Custom message dependencies (you'll need to create these)
-# find_package(your_custom_msgs REQUIRED)
+# Custom message dependencies
+find_package(pcl_filter_msgs REQUIRED)
 
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
@@ -41,7 +41,7 @@ ament_target_dependencies(pcl_filter_server
   tf2_geometry_msgs
   pcl_conversions
   cv_bridge
-  # your_custom_msgs  # Uncomment when you have custom messages
+  pcl_filter_msgs
 )
 
 target_link_libraries(pcl_filter_server ${PCL_LIBRARIES} ${OpenCV_LIBS})
