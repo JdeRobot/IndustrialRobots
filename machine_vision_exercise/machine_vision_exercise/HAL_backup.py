@@ -340,15 +340,14 @@ def attach(item):
     link_attacher_client.get_logger().info('Attach Response: %s' % attach_response.success)
 
 # Dettach all objects. It is always called when gripper is set to full open (0%)
-def detach(): 
+def dettach(): 
     link_attacher_client = LinkAttacherClient()
-    objects = [
-    'blue_sphere', 'red_sphere', 'green_sphere', 'purple_sphere',
-    'green_cylinder', 'purple_cylinder', 'red_cylinder', 'blue_cylinder'
-    ]
+    
     # Detach operation for all possible objects when gripper is set to 0%
-    for obj in objects:
-        link_attacher_client.send_detach_request('ur5', 'EE_robotiq_2f85', obj, obj)
+    link_attacher_client.send_detach_request('ur5', 'EE_robotiq_2f85', 'red_box', 'red_box')
+    link_attacher_client.send_detach_request('ur5', 'EE_robotiq_2f85', 'yellow_box', 'yellow_box')
+    link_attacher_client.send_detach_request('ur5', 'EE_robotiq_2f85', 'blue_sphere', 'blue_sphere')
+    link_attacher_client.send_detach_request('ur5', 'EE_robotiq_2f85', 'green_cylinder', 'green_cylinder')
 
 # Gripper closing and opeining to a given percentage (100% full open, 0% full closed)
 # Speed max 1.0, wait time after movement in seconds    
@@ -375,6 +374,405 @@ def GripperSet(relative_closure, wait_time):
     time.sleep(wait_time)
     print(f"Waiting {wait_time} s")
     print ("")
+
+#################################### PERCEPTION FUNCTIONS ###################################################
+
+#!/usr/bin/env python3
+
+import os
+import yaml
+import math
+import copy
+import numpy
+import rospkg
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Pose, Point, Quaternion, PoseStamped
+from std_msgs.msg import String, Bool
+from tf_transformations import quaternion_from_euler, euler_from_quaternion
+import tf2_ros
+from tf2_geometry_msgs import tf2_geometry_msgs
+
+# Custom message types - you'll need to define these in your ROS2 package
+# from your_package.msg import ColorFilter, ShapeFilter
+
+
+class Object:
+    def __init__(self, relative_pose, abs_pose, height, width, length, shape, color):
+        self.relative_pose = relative_pose
+        self.abs_pose = abs_pose
+        self.height = height
+        self.width = width
+        self.length = length
+        self.shape = shape
+        self.color = color
+
+
+class WorkSpace:
+    def __init__(self, x, y, z, min_r, max_r, min_z):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.min_r = min_r
+        self.max_r = max_r
+        self.min_z = min_z
+
+
+class Pick_Place(Node):
+    def __init__(self):
+        super().__init__('pick_place_node')
+        
+        # Initialize object and goal lists
+        self.object_list = {}
+        self.goal_list = {}
+        # Find the base directory of your package (install/share)
+        pkg_path = get_package_share_directory("machine_vision_exercise")
+
+        # Build the path down into src/rqt_vacuum_gripper/interfaces/models_info.yaml
+        self.filename = os.path.join(pkg_path, "config", "models_info.yaml")
+        
+        # Load object information
+        self._load_objects_info()
+        self._set_target_info()
+        
+        # Set up publishers
+        self.message_pub = self.create_publisher(String, '/gui_message', 10)
+        self.updatepose_pub = self.create_publisher(Bool, '/updatepose', 10)
+        
+        # Uncomment these when you have the custom message types defined
+        # self.color_filter_pub = self.create_publisher(ColorFilter, '/start_color_filter', 10)
+        # self.shape_filter_pub = self.create_publisher(ShapeFilter, '/start_shape_filter', 10)
+        
+        # Set up TF2 buffer and listener
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        
+        # Load workspace configuration
+        self._get_workspace()
+        
+        # Color and shape converters
+        self.color_shape_converter = {
+            "red": 1,
+            "green": 2,
+            "blue": 3,
+            "yellow": 4,
+            "sphere": 1,
+            "cylinder": 2
+        }
+        
+        self.get_logger().info('Pick_Place node initialized')
+
+    def _load_objects_info(self):
+        """Load object information from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                objects_info = yaml.safe_load(file)
+                
+                # Get robot pose
+                robot_x = objects_info["robot"]["pose"]["x"]
+                robot_y = objects_info["robot"]["pose"]["y"]
+                robot_z = objects_info["robot"]["pose"]["z"]
+                robot_roll = objects_info["robot"]["pose"]["roll"]
+                robot_pitch = objects_info["robot"]["pose"]["pitch"]
+                robot_yaw = objects_info["robot"]["pose"]["yaw"]
+                
+                # Process objects
+                objects = objects_info["objects"]
+                for object_name, obj_data in objects.items():
+                    name = object_name
+                    shape = obj_data["shape"]
+                    color = obj_data["color"]
+                    
+                    # Object pose
+                    x = obj_data["pose"]["x"]
+                    y = obj_data["pose"]["y"]
+                    z = obj_data["pose"]["z"]
+                    roll = obj_data["pose"]["roll"]
+                    pitch = obj_data["pose"]["pitch"]
+                    yaw = obj_data["pose"]["yaw"]
+                    
+                    object_pose = self.pose2msg(roll, pitch, yaw, x, y, z)
+                    
+                    # Create relative pose
+                    p = Pose()
+                    p.position.x = x - robot_x
+                    p.position.y = y - robot_y
+                    p.position.z = z - robot_z
+                    
+                    q = quaternion_from_euler(roll, pitch, yaw)
+                    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+                    
+                    # Handle different shapes
+                    if shape == "box":
+                        size_x = obj_data["size"]["x"]
+                        size_y = obj_data["size"]["y"]
+                        size_z = obj_data["size"]["z"]
+                        p.position.z += size_z / 2
+                        
+                        height = size_z
+                        width = size_y
+                        length = size_x
+                        self.object_list[name] = Object(p, object_pose, height, width, length, shape, color)
+                        
+                    elif shape == "cylinder":
+                        height = obj_data["size"]["height"]
+                        radius = obj_data["size"]["radius"]
+                        p.position.z += height / 2
+                        self.object_list[name] = Object(p, object_pose, height, radius*2, radius*2, shape, color)
+                        
+                    elif shape == "sphere":
+                        radius = obj_data["size"]
+                        p.position.z += radius
+                        self.object_list[name] = Object(p, object_pose, radius*2, radius*2, radius*2, shape, color)
+                        
+        except FileNotFoundError:
+            self.get_logger().error(f'Could not find models_info.yaml file at {filename}')
+        except Exception as e:
+            self.get_logger().error(f'Error loading objects info: {str(e)}')
+
+    def _set_target_info(self):
+        """Load target information from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                objects_info = yaml.safe_load(file)
+                
+                robot_x = objects_info["robot"]["pose"]["x"]
+                robot_y = objects_info["robot"]["pose"]["y"]
+                robot_z = objects_info["robot"]["pose"]["z"]
+                
+                targets = objects_info["targets"]
+                for name, target_data in targets.items():
+                    position = Point()
+                    position.x = target_data["x"] - robot_x
+                    position.y = target_data["y"] - robot_y
+                    position.z = target_data["z"] - robot_z
+                    self.goal_list[name] = position
+                    
+        except Exception as e:
+            self.get_logger().error(f'Error loading target info: {str(e)}')
+
+    def _get_workspace(self):
+        """Load workspace configuration from YAML file"""
+        try:            
+            with open(self.filename, 'r') as file:
+                joints_setup = yaml.safe_load(file)
+                workspace = joints_setup["workspace"]
+                
+                x = workspace["center"]["x"]
+                y = workspace["center"]["y"]
+                z = workspace["center"]["z"]
+                min_r = workspace["r"]["min"]
+                max_r = workspace["r"]["max"]
+                min_z = workspace["min_z"]
+                self.workspace = WorkSpace(x, y, z, min_r, max_r, min_z)
+                
+        except Exception as e:
+            self.get_logger().error(f'Error loading workspace config: {str(e)}')
+
+    # Publisher methods
+    def send_message(self, message):
+        """Send a message via ROS2 publisher"""
+        msg = String()
+        msg.data = message
+        self.message_pub.publish(msg)
+        
+    def updatepose_trigger(self, value):
+        """Trigger pose update"""
+        msg = Bool()
+        msg.data = value
+        self.updatepose_pub.publish(msg)
+
+    # Uncomment these methods when you have the custom message types defined
+
+    def start_color_filter(self, color, rmax, rmin, gmax, gmin, bmax, bmin):
+        color_filter = ColorFilter()
+        color_filter.color = self.color_shape_converter[color]
+        color_filter.rmax = rmax
+        color_filter.rmin = rmin
+        color_filter.gmax = gmax
+        color_filter.gmin = gmin
+        color_filter.bmax = bmax
+        color_filter.bmin = bmin
+        color_filter.status = True
+        self.color_filter_pub.publish(color_filter)
+
+    def stop_color_filter(self, color):
+        color_filter = ColorFilter()
+        color_filter.color = self.color_shape_converter[color]
+        color_filter.status = False
+        self.color_filter_pub.publish(color_filter)
+
+    def start_shape_filter(self, color, shape, radius):
+        shape_filter = ShapeFilter()
+        shape_filter.color = self.color_shape_converter[color]
+        shape_filter.shape = self.color_shape_converter[shape]
+        shape_filter.radius = radius
+        shape_filter.status = True
+        self.shape_filter_pub.publish(shape_filter)
+
+    def stop_shape_filter(self, color, shape):
+        shape_filter = ShapeFilter()
+        shape_filter.color = self.color_shape_converter[color]
+        shape_filter.shape = self.color_shape_converter[shape]
+        shape_filter.status = False
+        self.shape_filter_pub.publish(shape_filter)
+    
+
+    # Getter methods
+    def get_object_list(self):
+        """Get list of object names"""
+        return list(self.object_list.keys())
+
+    def get_target_list(self):
+        """Get list of target names"""
+        return list(self.goal_list.keys())
+
+    def get_object_pose(self, object_name):
+        """Get pose of specific object"""
+        if object_name in self.object_list:
+            return copy.deepcopy(self.object_list[object_name].relative_pose)
+        else:
+            self.get_logger().warn(f'Object {object_name} not found')
+            return None
+
+    def get_object_info(self, object_name):
+        """Get complete info of specific object"""
+        if object_name in self.object_list:
+            this_object = copy.deepcopy(self.object_list[object_name])
+            return (this_object.height, this_object.width, this_object.length, 
+                   this_object.shape, this_object.color)
+        else:
+            self.get_logger().warn(f'Object {object_name} not found')
+            return None
+        
+    def get_object_position(self, object_name):
+        """Get object position using TF2 transform lookup"""
+        frame_id = object_name
+        try:
+            # Lookup transform from world to object frame
+            transform = self.tf_buffer.lookup_transform(
+                'world', 
+                frame_id, 
+                rclpy.time.Time(),
+                timeout=rclpy.duration.Duration(seconds=1.0)
+            )
+            
+            # Extract translation
+            trans = transform.transform.translation
+            
+            position = Point()
+            position.x = trans.x
+            position.y = trans.y
+            position.z = trans.z
+            
+            print("*************************************")
+            print("Detected position of " + object_name + ":")
+            print([trans.x, trans.y, trans.z])
+            print("*************************************")
+            
+            return position
+            
+        except Exception as e:
+            self.get_logger().info("Cannot find desired object: " + str(e))
+            return None
+
+
+    def get_target_position(self, target_name):
+        """Get position of specific target"""
+        if target_name in self.goal_list:
+            return self.goal_list[target_name]
+        else:
+            self.get_logger().warn(f'Target {target_name} not found')
+            return None
+
+    # Utility methods for pose conversion
+    def pose2msg(self, roll, pitch, yaw, x, y, z):
+        """Convert roll, pitch, yaw, x, y, z to Pose message"""
+        pose = Pose()
+        quat = quaternion_from_euler(roll, pitch, yaw)
+        pose.orientation.x = quat[0]
+        pose.orientation.y = quat[1]
+        pose.orientation.z = quat[2]
+        pose.orientation.w = quat[3]
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = z
+        return pose
+
+    def msg2pose(self, pose):
+        """Convert Pose message to roll, pitch, yaw, x, y, z"""
+        x = pose.position.x
+        y = pose.position.y
+        z = pose.position.z
+        quaternion = (pose.orientation.x,
+                      pose.orientation.y,
+                      pose.orientation.z,
+                      pose.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+        roll = euler[0]
+        pitch = euler[1]
+        yaw = euler[2]
+        return roll, pitch, yaw, x, y, z
+
+    def pose2msg_deg(self, roll, pitch, yaw, x, y, z):
+        """Convert degrees to Pose message"""
+        pose = Pose()
+        quat = quaternion_from_euler(numpy.deg2rad(roll), 
+                                   numpy.deg2rad(pitch), 
+                                   numpy.deg2rad(yaw))
+        pose.orientation.x = quat[0]
+        pose.orientation.y = quat[1]
+        pose.orientation.z = quat[2]
+        pose.orientation.w = quat[3]
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = z
+        return pose
+
+    def msg2pose_deg(self, pose):
+        """Convert Pose message to degrees"""
+        x = pose.position.x
+        y = pose.position.y
+        z = pose.position.z
+        quaternion = (pose.orientation.x,
+                      pose.orientation.y,
+                      pose.orientation.z,
+                      pose.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+        roll = numpy.rad2deg(euler[0])
+        pitch = numpy.rad2deg(euler[1])
+        yaw = numpy.rad2deg(euler[2])
+        return roll, pitch, yaw, x, y, z
+
+    # Workspace validation
+    def is_inside_workspace(self, x, y, z):
+        """Check if position is inside workspace"""
+        if z > self.workspace.min_z:
+            dx = x - self.workspace.x
+            dy = y - self.workspace.y
+            dz = z - self.workspace.z
+            r = math.sqrt(dx**2 + dy**2 + dz**2)
+            if self.workspace.min_r < r < self.workspace.max_r:
+                return True
+        return False
+
+
+#################################### UTILITY FUNCTIONS ###################################################
+
+def initialize_perception():
+    """Initialize the perception system"""
+    print("Initializing perception system...")
+    _get_perception_manager()
+    print("Perception system ready")
+
+def shutdown_perception():
+    """Shutdown the perception system cleanly"""
+    global _perception_manager
+    if _perception_manager is not None:
+        _perception_manager.destroy_node()
+        _perception_manager = None
+    print("Perception system shutdown")
+
 
 #################################### WORKSPACE MAPPING ###################################################
 
@@ -412,6 +810,8 @@ def back_to_home():
     Uses higher speed (90%) and releases gripper
     """
     print("Moving robot back to home position...")
+    perception_mgr = _get_perception_manager()
+    perception_mgr.send_message("Returning to home position")
     
     # Move to home position with higher speed
     MoveAbsJ(_home_joints, 0.9, 1.0)
@@ -433,7 +833,10 @@ def move_joint_arm(joint_0, joint_1, joint_2, joint_3, joint_4, joint_5):
     
     # Use MoveAbsJ with moderate speed and wait time
     MoveAbsJ(joint_angles, 0.5, 1.0)
-
+    
+    # Trigger pose update for external systems
+    perception_mgr = _get_perception_manager()
+    perception_mgr.updatepose_trigger(True)
 
 def buildmap():
     """
@@ -442,6 +845,8 @@ def buildmap():
     for comprehensive workspace scanning and object detection
     """
     print("Starting workspace mapping procedure...")
+    perception_mgr = _get_perception_manager()
+    perception_mgr.send_message("Building workspace map")
     
     # Step 1: Go to home position
     back_to_home()
@@ -452,17 +857,18 @@ def buildmap():
     move_joint_arm(180.00, -90.0, 0.0, 0.0, -60.0, 0.0)  # Joint angles in degrees
     
     # Step 3: Wait for sensors to stabilize and capture data
-    time.sleep(0.5)
+    time.sleep(1.0)
     
     # Step 4: Trigger comprehensive workspace scan
-    # detected_objects = scan_workspace()
+    detected_objects = scan_workspace()
     
     # Step 5: Return to home position
     back_to_home()
     
     print("Workspace mapping completed")
+    perception_mgr.send_message("Workspace map built successfully")
     
-    # return detected_objects
+    return detected_objects
 
 def custom_scan_sequence(scan_positions):
     """
