@@ -68,7 +68,9 @@ class PerceptionNode(Node):
         
         # TF2 setup
         self.tf_buffer = tf2_ros.Buffer()
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        # Important: let TransformListener run a background spinner
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self, spin_thread=True)
+
         
         # Load configuration
         self.load_models_info()
@@ -276,6 +278,32 @@ class PerceptionNode(Node):
             return self.goal_list[target_name]
         return None
 
+    # def get_object_position(self, object_name):
+    #     """Get object position using TF2"""
+    #     frame_id = object_name
+    #     try:
+    #         # Use TF2 to get transform
+    #         transform = self.tf_buffer.lookup_transform(
+    #             'world', frame_id, rclpy.time.Time(), 
+    #             timeout=rclpy.duration.Duration(seconds=1.0)
+    #         )
+            
+    #         position = Point()
+    #         position.x = float(transform.transform.translation.x)
+    #         position.y = float(transform.transform.translation.y)
+    #         position.z = float(transform.transform.translation.z)
+            
+    #         self.get_logger().info("*************************************")
+    #         self.get_logger().info(f"Detected position of {object_name}:")
+    #         self.get_logger().info(f"[{position.x}, {position.y}, {position.z}]")
+    #         self.get_logger().info("*************************************")
+            
+    #         return position
+            
+    #     except Exception as e:
+    #         self.get_logger().error(f"Cannot find desired object {object_name}: {e}")
+    #         return None
+
     def get_object_position(self, object_name):
         """Get object position using TF2"""
         frame_id = object_name
@@ -286,14 +314,15 @@ class PerceptionNode(Node):
                 timeout=rclpy.duration.Duration(seconds=1.0)
             )
             
-            position = Point()
-            position.x = float(transform.transform.translation.x)
-            position.y = float(transform.transform.translation.y)
-            position.z = float(transform.transform.translation.z)
+            x = float(transform.transform.translation.x)
+            y = float(transform.transform.translation.y)
+            z = float(transform.transform.translation.z)
+            
+            position = [x, y, z]
             
             self.get_logger().info("*************************************")
             self.get_logger().info(f"Detected position of {object_name}:")
-            self.get_logger().info(f"[{position.x}, {position.y}, {position.z}]")
+            self.get_logger().info(f"{position}")
             self.get_logger().info("*************************************")
             
             return position
