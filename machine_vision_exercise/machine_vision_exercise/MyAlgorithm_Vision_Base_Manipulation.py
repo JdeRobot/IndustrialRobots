@@ -8,6 +8,7 @@ Skips gripper operations and scan_workspace - focuses on movement and link attac
 import time
 import sys
 from PERCEPTION import *
+from HAL import *
 
 # Import the HAL API functions
 try:
@@ -231,136 +232,142 @@ def reset(perception):
 
 def main():
 
-
-    COLORS = ["red", "green", "blue", "purple"]
-    SHAPES = ["sphere", "cylinder"]
-
-    # Per-color presets (RGB ranges). Tune here once.
-    COLOR_PRESETS = {
-        "red":    dict(rmin=100, rmax=255, gmin=0,   gmax=20,  bmin=0,   bmax=20),
-        "green":  dict(rmin=0,   rmax=20,  gmin=100, gmax=255, bmin=0,   bmax=20),
-        "blue":   dict(rmin=0,   rmax=20,  gmin=0,   gmax=20,  bmin=100, bmax=255),
-        "purple": dict(rmin=100, rmax=255, gmin=0,   gmax=100, bmin=10, bmax=255)
-    }
-
-    # ===== Your test =====
-    print("=== Test 3 color & shape filter ===\n")
-    perception = PerceptionNode()
-    perception.load_models_info()
-    reset(perception=perception)
-
-    # COLORS = ["red", "green", "blue", "purple"]
-    # SHAPES = ["sphere", "cylinder"]
-    # Pick by index:
-    color_idx = 3   # COLORS[3] -> "purple"
-    shape_idx = 0   # SHAPES[1] -> "cylinder"
-    color_name = COLORS[color_idx]
-    shape_name = SHAPES[shape_idx]
-
-    object_name = f"{color_name}_{shape_name}"
-    print(object_name)
-
-    color_param = COLOR_PRESETS[color_name].copy()
-
-    radius, width, length, shape, color = perception.get_object_info(object_name)
-    print(radius, width, length, shape, color)
-
-    # object_pos = [0.65, 0.09, 1.01]    # Red cylinder position
-    target_pos = [-0.44, -0.06, 1.0]   # Target position
-    
-    # Orientations
-    down_orientation = [0, 90, 0]      # Gripper pointing down
-
-
-    # Step 1: Set up and go to home position
-    print("\n1. Setting up home position and moving there...")
-    set_home_position([0.0, -90.0, 0.0, 0.0, -90.0, 0.0])
-    # Use MoveAbsJ instead of back_to_home to avoid gripper operations
-    MoveAbsJ([0.0, -90.0, 0.0, 0.0, -90.0, 0.0], 0.5, 2.0)
-    
-    # Step 2: Skip workspace scanning
-    buildmap()
-    
-    # Step 3: Move to pre-pick position (approach from side)
-    print("\n3. Moving to pre-pick position...")
-    MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
-
-
-
-#################################################################################################################
-    # # Step 4: Move to position above object (safe pick position)
-
-    object_pos = []
-
-    # Start filters using presets; override any single value ad hoc if needed:
-    # e.g., _send_color_filter(perception, color_name, override={"gmin": 80})
-    perception.start_color_filter(
-        color=color_name,
-        rmax=color_param["rmax"], rmin=color_param["rmin"],
-        gmax=color_param["gmax"], gmin=color_param["gmin"],
-        bmax=color_param["bmax"], bmin=color_param["bmin"],
-    )
-    time.sleep(3)
-
-    perception.start_shape_filter(color=color,shape=shape,radius=0.01)
-    time.sleep(3)
-
-
-    object_pos = perception.get_object_position(object_name)
-
-    print(object_pos)
-
-    reset(perception)
-#################################################################################################################
-
-    print("\n4. Moving to safe position above object...")
-    above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
-    MoveJoint(above_object, down_orientation, 0.3, 2.0)
-    
-    # Step 5: Linear approach to object
-    print("\n5. Linear approach to object...")
-    approach_object = [object_pos[0], object_pos[1], object_pos[2] + 0.05]
-    MoveLinear(approach_object, down_orientation, 0.1, 1.5)
-
-
+    GripperSet(100, 1.0)
+    time.sleep(1.0)
+    # GripperSet(0, 1.0)
 
     
-    # Step 7: Attach object (skip gripper, use link attacher only)
 
-    print("\n7. Attaching object using link attacher...")
-    attach(object_name)
-    print("✓ Object attached successfully!")
-    
-    # Step 8: Lift object to safe height
+#     COLORS = ["red", "green", "blue", "purple"]
+#     SHAPES = ["sphere", "cylinder"]
 
-    above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
-    MoveJoint(above_object, down_orientation, 0.3, 2.0)
-    MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
-    
-    # Step 9: Move to pre-place position (approach target area)
+#     # Per-color presets (RGB ranges). Tune here once.
+#     COLOR_PRESETS = {
+#         "red":    dict(rmin=100, rmax=255, gmin=0,   gmax=20,  bmin=0,   bmax=20),
+#         "green":  dict(rmin=0,   rmax=20,  gmin=100, gmax=255, bmin=0,   bmax=20),
+#         "blue":   dict(rmin=0,   rmax=20,  gmin=0,   gmax=20,  bmin=100, bmax=255),
+#         "purple": dict(rmin=100, rmax=255, gmin=0,   gmax=100, bmin=10, bmax=255)
+#     }
 
-    print("\n9. Moving to pre-place position...")
-    MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
-    above_target = [target_pos[0], target_pos[1], target_pos[2] + 0.15]
-    MoveJoint(above_target, down_orientation, 0.5, 2.5)
+#     # ===== Your test =====
+#     print("=== Test 3 color & shape filter ===\n")
+#     perception = PerceptionNode()
+#     perception.load_models_info()
+#     reset(perception=perception)
+
+#     # COLORS = ["red", "green", "blue", "purple"]
+#     # SHAPES = ["sphere", "cylinder"]
+#     # Pick by index:
+#     color_idx = 3   # COLORS[3] -> "purple"
+#     shape_idx = 0   # SHAPES[1] -> "cylinder"
+#     color_name = COLORS[color_idx]
+#     shape_name = SHAPES[shape_idx]
+
+#     object_name = f"{color_name}_{shape_name}"
+#     print(object_name)
+
+#     color_param = COLOR_PRESETS[color_name].copy()
+
+#     radius, width, length, shape, color = perception.get_object_info(object_name)
+#     print(radius, width, length, shape, color)
+
+#     # object_pos = [0.65, 0.09, 1.01]    # Red cylinder position
+#     target_pos = [-0.44, -0.06, 1.0]   # Target position
     
-    # Step 10: Move to safe position above target
-    print("\n11. Linear approach to target...")
-    approach_target = [target_pos[0], target_pos[1], target_pos[2]]
-    MoveLinear(approach_target, down_orientation, 0.1, 1.5)
+#     # Orientations
+#     down_orientation = [0, 90, 0]      # Gripper pointing down
+
+
+#     # Step 1: Set up and go to home position
+#     print("\n1. Setting up home position and moving there...")
+#     set_home_position([0.0, -90.0, 0.0, 0.0, -90.0, 0.0])
+#     # Use MoveAbsJ instead of back_to_home to avoid gripper operations
+#     MoveAbsJ([0.0, -90.0, 0.0, 0.0, -90.0, 0.0], 0.5, 2.0)
     
-    # Step 11: Linear approach to target
-    detach()
+#     # Step 2: Skip workspace scanning
+#     buildmap()
     
-    # Step 12: Place object at target
-    print("\n11. Linear approach to target...")
-    approach_target = [target_pos[0], target_pos[1], target_pos[2]+ 0.15]
-    MoveLinear(approach_target, down_orientation, 0.1, 1.5)
-    MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
+#     # Step 3: Move to pre-pick position (approach from side)
+#     print("\n3. Moving to pre-pick position...")
+#     MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
+
+
+
+# #################################################################################################################
+#     # # Step 4: Move to position above object (safe pick position)
+
+#     object_pos = []
+
+#     # Start filters using presets; override any single value ad hoc if needed:
+#     # e.g., _send_color_filter(perception, color_name, override={"gmin": 80})
+#     perception.start_color_filter(
+#         color=color_name,
+#         rmax=color_param["rmax"], rmin=color_param["rmin"],
+#         gmax=color_param["gmax"], gmin=color_param["gmin"],
+#         bmax=color_param["bmax"], bmin=color_param["bmin"],
+#     )
+#     time.sleep(3)
+
+#     perception.start_shape_filter(color=color,shape=shape,radius=0.01)
+#     time.sleep(3)
+
+
+#     object_pos = perception.get_object_position(object_name)
+
+#     print(object_pos)
+
+#     reset(perception)
+# #################################################################################################################
+
+#     print("\n4. Moving to safe position above object...")
+#     above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
+#     MoveJoint(above_object, down_orientation, 0.3, 2.0)
     
-    # Step 13: Release object (open gripper will auto-detach)
-    back_to_home()
+#     # Step 5: Linear approach to object
+#     print("\n5. Linear approach to object...")
+#     approach_object = [object_pos[0], object_pos[1], object_pos[2] + 0.05]
+#     MoveLinear(approach_object, down_orientation, 0.1, 1.5)
+
+
+
     
+#     # Step 7: Attach object (skip gripper, use link attacher only)
+
+#     print("\n7. Attaching object using link attacher...")
+#     attach(object_name)
+#     print("✓ Object attached successfully!")
+    
+#     # Step 8: Lift object to safe height
+
+#     above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
+#     MoveJoint(above_object, down_orientation, 0.3, 2.0)
+#     MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
+    
+#     # Step 9: Move to pre-place position (approach target area)
+
+#     print("\n9. Moving to pre-place position...")
+#     MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
+#     above_target = [target_pos[0], target_pos[1], target_pos[2] + 0.15]
+#     MoveJoint(above_target, down_orientation, 0.5, 2.5)
+    
+#     # Step 10: Move to safe position above target
+#     print("\n11. Linear approach to target...")
+#     approach_target = [target_pos[0], target_pos[1], target_pos[2]]
+#     MoveLinear(approach_target, down_orientation, 0.1, 1.5)
+    
+#     # Step 11: Linear approach to target
+#     detach()
+    
+#     # Step 12: Place object at target
+#     print("\n11. Linear approach to target...")
+#     approach_target = [target_pos[0], target_pos[1], target_pos[2]+ 0.15]
+#     MoveLinear(approach_target, down_orientation, 0.1, 1.5)
+#     MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 2.0)
+    
+#     # Step 13: Release object (open gripper will auto-detach)
+#     back_to_home()
+    
+
 
 if __name__ == "__main__":
     main()

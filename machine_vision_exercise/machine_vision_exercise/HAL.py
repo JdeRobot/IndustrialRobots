@@ -366,7 +366,7 @@ def GripperSet(relative_closure, wait_time):
         print(f"Gripper set to a percentage of: {relative_closure} %")
         print(f"Movement Execution Time: {EXECUTION['ExecTime']} s")
         if relative_closure == 0:
-            dettach() # Automatic object dettach from gripper when full open (0%)
+            detach() # Automatic object dettach from gripper when full open (0%)
             
     else: 
         print("Gripper closing FAILED, check REASON in MoveIt output")
@@ -375,6 +375,7 @@ def GripperSet(relative_closure, wait_time):
     time.sleep(wait_time)
     print(f"Waiting {wait_time} s")
     print ("")
+
 
 #################################### WORKSPACE MAPPING ###################################################
 
