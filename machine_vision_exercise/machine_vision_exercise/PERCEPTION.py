@@ -22,6 +22,8 @@ import numpy as np
 import copy
 import math
 
+from HAL import *
+
 
 class Object:
     def __init__(self, relative_pose, abs_pose, height, width, length, shape, color):
@@ -65,7 +67,7 @@ class PerceptionNode(Node):
         self.updatepose_pub = self.create_publisher(Bool, '/updatepose', 10)
         self.color_filter_pub = self.create_publisher(ColorFilter, '/start_color_filter', 10)
         self.shape_filter_pub = self.create_publisher(ShapeFilter, '/start_shape_filter', 10)
-        
+        self.env_scan_pub = self.create_publisher(Bool, '/trigger_env_scan', 10)
         # TF2 setup
         self.tf_buffer = tf2_ros.Buffer()
         # Important: let TransformListener run a background spinner
@@ -170,7 +172,7 @@ class PerceptionNode(Node):
                     position = Point()
                     position.x = float(targets[name]["x"] - robot_x)
                     position.y = float(targets[name]["y"] - robot_y)
-                    position.z = float(targets[name]["z"] - robot_z)
+                    position.z = float(targets[name]["z"])
                     self.goal_list[name] = position
                     
         except Exception as e:
@@ -278,6 +280,17 @@ class PerceptionNode(Node):
             return self.goal_list[target_name]
         return None
 
+    def gripper_setting_percentage(self, diameter, max_open_m=0.085):
+        """
+        Convert object radius (in meters) to gripper closure percentage.
+        - radius_m: object radius in meters
+        - max_open_m: max jaw opening in meters (default 0.085 m for 2F-85)
+
+        Returns: closure percentage [0-100]
+        """
+        percentage = (1 - (diameter / max_open_m) )* 100.0
+        return percentage  # clamp
+    
     # def get_object_position(self, object_name):
     #     """Get object position using TF2"""
     #     frame_id = object_name
@@ -316,7 +329,7 @@ class PerceptionNode(Node):
             
             x = float(transform.transform.translation.x)
             y = float(transform.transform.translation.y)
-            z = float(transform.transform.translation.z)
+            z = float(transform.transform.translation.z + 0.03)
             
             position = [x, y, z]
             
@@ -397,7 +410,55 @@ class PerceptionNode(Node):
         pitch = np.rad2deg(euler[1])
         yaw = np.rad2deg(euler[2])
         return roll, pitch, yaw, x, y, z
+    
+    def start_environment_scan(self):
+        """Start environment scanning for collision detection"""
+        msg = Bool()
+        msg.data = True
+        self.env_scan_pub.publish(msg)
+        self.get_logger().info("Environment scanning started")
+        self.send_message("Environment scanning started")
 
+    def stop_environment_scan(self):
+        """Stop environment scanning"""
+        msg = Bool()
+        msg.data = False
+        self.env_scan_pub.publish(msg)
+        self.get_logger().info("Environment scanning stopped")
+        self.send_message("Environment scanning stopped")
+
+    def buildmap(self):
+        """
+        Build a map of the workspace by moving robot to scanning positions
+        This function moves the robot through key positions to get different viewpoints
+        for comprehensive workspace scanning and object detection
+        """
+        print("Starting workspace mapping procedure...")
+        
+        # Step 1: Go to home position
+        back_to_home()
+
+        # Start environment scanning
+        self.start_environment_scan()
+        time.sleep(1.0)
+
+        # Step 2: Move to scanning position
+        # This position provides a good overview of the workspace
+        print("Moving to scanning position...")
+        MoveAbsJ([180.00, -90.0, 0.0, 0.0, -60.0, 0.0], 0.1, 1)
+
+        # Step 3: Wait for sensors to stabilize and capture data
+        time.sleep(2)
+        self.stop_environment_scan()
+        # Step 4: Trigger comprehensive workspace scan
+        # detected_objects = scan_workspace()
+        
+        # Step 5: Return to home position
+        back_to_home()
+        
+        print("Workspace mapping completed")
+        
+        # return detected_objects
 
 def main(args=None):
     rclpy.init(args=args)

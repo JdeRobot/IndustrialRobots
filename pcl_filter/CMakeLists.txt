@@ -19,7 +19,7 @@ find_package(PCL REQUIRED COMPONENTS common io filters segmentation)
 find_package(pcl_conversions REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
-
+find_package(moveit_msgs REQUIRED)
 # Custom message dependencies
 find_package(pcl_filter_msgs REQUIRED)
 
@@ -42,6 +42,7 @@ ament_target_dependencies(pcl_filter_server
   pcl_conversions
   cv_bridge
   pcl_filter_msgs
+  moveit_msgs
 )
 
 target_link_libraries(pcl_filter_server ${PCL_LIBRARIES} ${OpenCV_LIBS})

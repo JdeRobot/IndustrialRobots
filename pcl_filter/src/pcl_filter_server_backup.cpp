@@ -12,6 +12,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <pcl/filters/voxel_grid.h>
 
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
@@ -472,83 +473,106 @@ public:
     detect_cylinder(cloud_input, pub_purple_cylinder, image_pub_purple_cylinder, "purple_cylinder", purple_cylinder_radius);
   }
 
-  void detect_cylinder(const PointCloud::Ptr& cloud, rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub, rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub, std::string frame_id, float radius)
-  {
-    // All the objects needed
-    pcl::PassThrough<PointT> pass;
-    pcl::NormalEstimation<PointT, pcl::Normal> ne;
-    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
-    pcl::ExtractIndices<PointT> extract;
-    pcl::ExtractIndices<pcl::Normal> extract_normals;
-    pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+  void detect_cylinder(
+    const PointCloud::Ptr& cloud,
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub,
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub,
+    std::string frame_id,
+    float radius)
+{
+  // ---------- Safety pre-pass ----------
+  PointCloud::Ptr cloud_clean(new PointCloud);
+  std::vector<int> idx;
+  pcl::removeNaNFromPointCloud(*cloud, *cloud_clean, idx);
+  if (!cloud_clean || cloud_clean->points.size() < 30) return;
 
-    // Datasets
-    PointCloud::Ptr cloud_filtered (new PointCloud);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-    PointCloud::Ptr cloud_filtered2 (new PointCloud);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
-    pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new pcl::PointIndices);
+  // ---------- (unchanged core) ----------
+  pcl::PassThrough<PointT> pass;
+  pcl::NormalEstimation<PointT, pcl::Normal> ne;
+  pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
+  pcl::ExtractIndices<PointT> extract;
+  pcl::ExtractIndices<pcl::Normal> extract_normals;
+  pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
 
-    // Build a passthrough filter to remove spurious NaNs
-    pass.setInputCloud (cloud);
-    pass.setFilterFieldName ("z");
-    pass.setFilterLimits (0, 1);
-    pass.filter (*cloud_filtered);
+  PointCloud::Ptr cloud_filtered (new PointCloud);
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+  PointCloud::Ptr cloud_filtered2 (new PointCloud);
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+  pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new pcl::PointIndices);
 
-    if(cloud_filtered->points.size ()<10)
-      {RCLCPP_INFO(this->get_logger(), "Cannot filter out desired shape");
-      return;}
+  pass.setInputCloud (cloud_clean);
+  pass.setFilterFieldName ("z");
+  pass.setFilterLimits (0.05, 2.0);
+  pass.filter (*cloud_filtered);
+  if (cloud_filtered->points.size() < 50) return;
 
-    // Estimate point normals
-    ne.setSearchMethod (tree);
-    ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (50);
-    ne.compute (*cloud_normals);
+  ne.setSearchMethod (tree);
+  ne.setInputCloud (cloud_filtered);
+  ne.setKSearch (20);
+  ne.compute (*cloud_normals);
+  if (cloud_normals->points.size() != cloud_filtered->points.size()) return;
 
-    // Create the segmentation object for the planar model and set all the parameters
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
-    seg.setNormalDistanceWeight (0.1);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (100);
-    seg.setDistanceThreshold (0.03);
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+  seg.setNormalDistanceWeight (0.1);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setMaxIterations (100);
+  seg.setDistanceThreshold (0.05);
+  seg.setInputCloud (cloud_filtered);
+  seg.setInputNormals (cloud_normals);
+  seg.segment (*inliers_plane, *coefficients_plane);
+
+  extract.setInputCloud (cloud_filtered);
+  extract.setIndices (inliers_plane);
+  extract.setNegative (true);
+  extract.filter (*cloud_filtered2);
+
+  extract_normals.setNegative (true);
+  extract_normals.setInputCloud (cloud_normals);
+  extract_normals.setIndices (inliers_plane);
+  extract_normals.filter (*cloud_normals2);
+
+  if (cloud_filtered2->points.size() < 10 || cloud_normals2->points.size() < 10) return;
+
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_CYLINDER);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setNormalDistanceWeight (0.1);
+  seg.setMaxIterations (10000);
+  seg.setDistanceThreshold (0.05);
+  seg.setRadiusLimits (0.001, radius * 3.0f);
+  seg.setInputCloud (cloud_filtered2);
+  seg.setInputNormals (cloud_normals2);
+  seg.segment (*inliers_cylinder, *coefficients_cylinder);
+
+  if (inliers_cylinder->indices.size() < 5) {
+    // fallback: try on cloud_filtered directly
     seg.setInputCloud (cloud_filtered);
     seg.setInputNormals (cloud_normals);
-    // Obtain the plane inliers and coefficients
-    seg.segment (*inliers_plane, *coefficients_plane);
-
-    // Extract the planar inliers from the input cloud
-    extract.setInputCloud (cloud_filtered);
-    extract.setIndices (inliers_plane);
-    extract.setNegative (false);
-
-    // Remove the planar inliers, extract the rest
-    extract.setNegative (true);
-    extract.filter (*cloud_filtered2);
-    extract_normals.setNegative (true);
-    extract_normals.setInputCloud (cloud_normals);
-    extract_normals.setIndices (inliers_plane);
-    extract_normals.filter (*cloud_normals2);
-
-    if(cloud_filtered2->points.size ()<10)
-      {RCLCPP_INFO(this->get_logger(), "Cannot filter out desired shape");
-      return;}
-
-    // Create the segmentation object for cylinder segmentation and set all the parameters
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_CYLINDER);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setNormalDistanceWeight (0.1);
-    seg.setMaxIterations (10000);
-    seg.setDistanceThreshold (0.05);
-    seg.setRadiusLimits (0, radius);
-    seg.setInputCloud (cloud_filtered2);
-    seg.setInputNormals (cloud_normals2);
-
-    // Obtain the cylinder inliers and coefficients
     seg.segment (*inliers_cylinder, *coefficients_cylinder);
+    if (inliers_cylinder->indices.size() < 5) return;
+  }
 
+  // Validate coefficients before use
+  if (coefficients_cylinder->values.size() < 7) return;
+  const float detected_radius = coefficients_cylinder->values[6];
+  if (!(detected_radius > 0.001f) || !(detected_radius < radius * 5.0f)) return;
+
+  // Extract inliers (choose matching cloud for indices)
+  pcl::PointCloud<PointT>::Ptr cylinder_cloud(new pcl::PointCloud<PointT>());
+  if (inliers_cylinder->indices.size() <= cloud_filtered2->points.size()) {
+    extract.setInputCloud (cloud_filtered2);
+  } else {
+    extract.setInputCloud (cloud_filtered);
+  }
+  extract.setIndices (inliers_cylinder);
+  extract.setNegative (false);
+  extract.filter (*cylinder_cloud);
+  if (cylinder_cloud->empty()) return;
+
+  // Publish TF (safe)
+  {
     geometry_msgs::msg::TransformStamped t;
     t.header.stamp = this->get_clock()->now();
     t.header.frame_id = "base_camera_optical_link";
@@ -556,106 +580,148 @@ public:
     t.transform.translation.x = coefficients_cylinder->values[0];
     t.transform.translation.y = coefficients_cylinder->values[1];
     t.transform.translation.z = coefficients_cylinder->values[2];
-    tf2::Quaternion q;
-    q.setRPY(0, 0, 0);
+    tf2::Quaternion q; q.setRPY(0,0,0);
     t.transform.rotation.x = q.x();
     t.transform.rotation.y = q.y();
     t.transform.rotation.z = q.z();
     t.transform.rotation.w = q.w();
     tf_broadcaster_->sendTransform(t);
+  }
 
-    // Write the cylinder inliers to disk
-    extract.setInputCloud (cloud_filtered2);
-    extract.setIndices (inliers_cylinder);
-    extract.setNegative (false);
-    pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
-    extract.filter (*cloud_cylinder);
-
+  // Publish cloud
+  {
     sensor_msgs::msg::PointCloud2 output_msg;
-    pcl::toROSMsg(*cloud_cylinder, output_msg);
+    pcl::toROSMsg(*cylinder_cloud, output_msg);
     output_msg.header.stamp = this->get_clock()->now();
     output_msg.header.frame_id = "base_camera_optical_link";
     pub->publish(output_msg);
-    pointcloud_to_depth_image(cloud_cylinder, image_pub);
   }
 
-  void detect_sphere(const PointCloud::Ptr& cloud, rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub, rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub, std::string frame_id, float radius)
+  // Safe depth image projection (clamped indices; skips bad z)
   {
-    // All the objects needed
-    pcl::PassThrough<PointT> pass;
-    pcl::NormalEstimation<PointT, pcl::Normal> ne;
-    pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
-    pcl::ExtractIndices<PointT> extract;
-    pcl::ExtractIndices<pcl::Normal> extract_normals;
-    pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+    const float centre_x = 320.5f, centre_y = 240.5f;
+    const float fx = 554.3827128226441f, fy = 554.3827128226441f;
+    const int width = 640, height = 480;
 
-    // Datasets
-    PointCloud::Ptr cloud_filtered (new PointCloud);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-    PointCloud::Ptr cloud_filtered2 (new PointCloud);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
-    pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
+    cv::Mat cv_image(height, width, CV_32FC1, cv::Scalar(std::numeric_limits<float>::max()));
+    for (const auto& p : cylinder_cloud->points) {
+      if (!std::isfinite(p.z) || p.z <= 0.f) continue;
+      const float z = p.z * 1000.f;
+      const float u = (p.x * 1000.f * fx) / z + centre_x;
+      const float v = (p.y * 1000.f * fy) / z + centre_y;
+      const int px = std::clamp(static_cast<int>(std::lround(u)), 0, width  - 1);
+      const int py = std::clamp(static_cast<int>(std::lround(v)), 0, height - 1);
+      cv_image.at<float>(py, px) = z;
+    }
 
-    // Build a passthrough filter to remove spurious NaNs
-    pass.setInputCloud (cloud);
-    pass.setFilterFieldName ("z");
-    pass.setFilterLimits (0, 1);
-    pass.filter (*cloud_filtered);
+    std_msgs::msg::Header header;
+    header.frame_id = "base_camera_optical_link";
+    header.stamp = this->get_clock()->now();
+    auto out_img = cv_bridge::CvImage(header, "32FC1", cv_image).toImageMsg();
+    image_pub->publish(*out_img);
+  }
+}
 
-    if(cloud_filtered->points.size ()<1000)
-      {RCLCPP_INFO(this->get_logger(), "Cannot filter out desired shape");
-      return;}
+void detect_sphere(
+    const PointCloud::Ptr& cloud,
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub,
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub,
+    std::string frame_id,
+    float radius)
+{
+  // ---------- Safety pre-pass ----------
+  PointCloud::Ptr cloud_clean(new PointCloud);
+  std::vector<int> idx;
+  pcl::removeNaNFromPointCloud(*cloud, *cloud_clean, idx);
+  if (!cloud_clean || cloud_clean->points.size() < 50) return;
 
-    // Estimate point normals
-    ne.setSearchMethod (tree);
-    ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (50);
-    ne.compute (*cloud_normals);
+  // ---------- (unchanged core) ----------
+  pcl::PassThrough<PointT> pass;
+  pcl::NormalEstimation<PointT, pcl::Normal> ne;
+  pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
+  pcl::ExtractIndices<PointT> extract;
+  pcl::ExtractIndices<pcl::Normal> extract_normals;
+  pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
 
-    // Create the segmentation object for the planar model and set all the parameters
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
-    seg.setNormalDistanceWeight (0.1);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (100);
-    seg.setDistanceThreshold (0.03);
+  PointCloud::Ptr cloud_filtered (new PointCloud);
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+  PointCloud::Ptr cloud_filtered2 (new PointCloud);
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+  pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_sphere (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_sphere (new pcl::PointIndices);
+
+  pass.setInputCloud (cloud_clean);
+  pass.setFilterFieldName ("z");
+  pass.setFilterLimits (0.05, 2.0);
+  pass.filter (*cloud_filtered);
+  if (cloud_filtered->points.size() < 100) return;
+
+  ne.setSearchMethod (tree);
+  ne.setInputCloud (cloud_filtered);
+  ne.setKSearch (30);
+  ne.compute (*cloud_normals);
+  if (cloud_normals->points.size() != cloud_filtered->points.size()) return;
+
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+  seg.setNormalDistanceWeight (0.1);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setMaxIterations (100);
+  seg.setDistanceThreshold (0.05);
+  seg.setInputCloud (cloud_filtered);
+  seg.setInputNormals (cloud_normals);
+  seg.segment (*inliers_plane, *coefficients_plane);
+
+  extract.setInputCloud (cloud_filtered);
+  extract.setIndices (inliers_plane);
+  extract.setNegative (true);
+  extract.filter (*cloud_filtered2);
+
+  extract_normals.setNegative (true);
+  extract_normals.setInputCloud (cloud_normals);
+  extract_normals.setIndices (inliers_plane);
+  extract_normals.filter (*cloud_normals2);
+
+  if (cloud_filtered2->points.size() < 20 || cloud_normals2->points.size() < 20) return;
+
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_NORMAL_SPHERE);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setNormalDistanceWeight (0.1);
+  seg.setMaxIterations (10000);
+  seg.setDistanceThreshold (0.05);
+  seg.setRadiusLimits (0.001f, radius * 3.0f);
+  seg.setInputCloud (cloud_filtered2);
+  seg.setInputNormals (cloud_normals2);
+  seg.segment (*inliers_sphere, *coefficients_sphere);
+
+  if (inliers_sphere->indices.size() < 10) {
+    // fallback: try on cloud_filtered directly
     seg.setInputCloud (cloud_filtered);
     seg.setInputNormals (cloud_normals);
-    // Obtain the plane inliers and coefficients
-    seg.segment (*inliers_plane, *coefficients_plane);
-
-    // Extract the planar inliers from the input cloud
-    extract.setInputCloud (cloud_filtered);
-    extract.setIndices (inliers_plane);
-    extract.setNegative (false);
-
-    // Remove the planar inliers, extract the rest
-    extract.setNegative (true);
-    extract.filter (*cloud_filtered2);
-    extract_normals.setNegative (true);
-    extract_normals.setInputCloud (cloud_normals);
-    extract_normals.setIndices (inliers_plane);
-    extract_normals.filter (*cloud_normals2);
-
-    if(cloud_filtered2->points.size ()<1000)
-      {RCLCPP_INFO(this->get_logger(), "Cannot filter out desired shape");
-      return;}
-
-    // Create the segmentation object for sphere segmentation and set all the parameters
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_NORMAL_SPHERE);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setNormalDistanceWeight (0.1);
-    seg.setMaxIterations (10000);
-    seg.setDistanceThreshold (0.05);
-    seg.setRadiusLimits (0, radius);
-    seg.setInputCloud (cloud_filtered2);
-    seg.setInputNormals (cloud_normals2);
-
-    // Obtain the sphere inliers and coefficients
     seg.segment (*inliers_sphere, *coefficients_sphere);
+    if (inliers_sphere->indices.size() < 10) return;
+  }
 
+  // Validate coefficients before use
+  if (coefficients_sphere->values.size() < 4) return;
+  const float detected_radius = coefficients_sphere->values[3];
+  if (!(detected_radius > 0.001f) || !(detected_radius < radius * 5.0f)) return;
+
+  // Extract inliers (choose matching cloud for indices)
+  pcl::PointCloud<PointT>::Ptr sphere_cloud(new pcl::PointCloud<PointT>());
+  if (inliers_sphere->indices.size() <= cloud_filtered2->points.size()) {
+    extract.setInputCloud (cloud_filtered2);
+  } else {
+    extract.setInputCloud (cloud_filtered);
+  }
+  extract.setIndices (inliers_sphere);
+  extract.setNegative (false);
+  extract.filter (*sphere_cloud);
+  if (sphere_cloud->empty()) return;
+
+  // Publish TF (safe)
+  {
     geometry_msgs::msg::TransformStamped t;
     t.header.stamp = this->get_clock()->now();
     t.header.frame_id = "base_camera_optical_link";
@@ -663,28 +729,48 @@ public:
     t.transform.translation.x = coefficients_sphere->values[0];
     t.transform.translation.y = coefficients_sphere->values[1];
     t.transform.translation.z = coefficients_sphere->values[2];
-    tf2::Quaternion q;
-    q.setRPY(0, 0, 0);
+    tf2::Quaternion q; q.setRPY(0,0,0);
     t.transform.rotation.x = q.x();
     t.transform.rotation.y = q.y();
     t.transform.rotation.z = q.z();
     t.transform.rotation.w = q.w();
     tf_broadcaster_->sendTransform(t);
+  }
 
-    // Write the sphere inliers to disk
-    extract.setInputCloud (cloud_filtered2);
-    extract.setIndices (inliers_sphere);
-    extract.setNegative (false);
-    pcl::PointCloud<PointT>::Ptr cloud_sphere (new pcl::PointCloud<PointT> ());
-    extract.filter (*cloud_sphere);
-
+  // Publish cloud
+  {
     sensor_msgs::msg::PointCloud2 output_msg;
-    pcl::toROSMsg(*cloud_sphere, output_msg);
+    pcl::toROSMsg(*sphere_cloud, output_msg);
     output_msg.header.stamp = this->get_clock()->now();
     output_msg.header.frame_id = "base_camera_optical_link";
     pub->publish(output_msg);
-    pointcloud_to_depth_image(cloud_sphere, image_pub);
   }
+
+  // Safe depth image projection (clamped indices; skips bad z)
+  {
+    const float centre_x = 320.5f, centre_y = 240.5f;
+    const float fx = 554.3827128226441f, fy = 554.3827128226441f;
+    const int width = 640, height = 480;
+
+    cv::Mat cv_image(height, width, CV_32FC1, cv::Scalar(std::numeric_limits<float>::max()));
+    for (const auto& p : sphere_cloud->points) {
+      if (!std::isfinite(p.z) || p.z <= 0.f) continue;
+      const float z = p.z * 1000.f;
+      const float u = (p.x * 1000.f * fx) / z + centre_x;
+      const float v = (p.y * 1000.f * fy) / z + centre_y;
+      const int px = std::clamp(static_cast<int>(std::lround(u)), 0, width  - 1);
+      const int py = std::clamp(static_cast<int>(std::lround(v)), 0, height - 1);
+      cv_image.at<float>(py, px) = z;
+    }
+
+    std_msgs::msg::Header header;
+    header.frame_id = "base_camera_optical_link";
+    header.stamp = this->get_clock()->now();
+    auto out_img = cv_bridge::CvImage(header, "32FC1", cv_image).toImageMsg();
+    image_pub->publish(*out_img);
+  }
+}
+
 
   void pointcloud_to_depth_image(const PointCloud::Ptr& msg, rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub)
 {

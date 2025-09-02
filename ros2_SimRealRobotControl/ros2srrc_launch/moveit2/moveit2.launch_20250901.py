@@ -40,7 +40,6 @@ from launch.actions import IncludeLaunchDescription, RegisterEventHandler, Timer
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
-
 # LOAD FILE:
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -51,7 +50,6 @@ def load_file(package_name, file_path):
     except EnvironmentError:
         # parent of IOError, OSError *and* WindowsError where available.
         return None
-        
 # LOAD YAML:
 def load_yaml(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -274,179 +272,103 @@ def generate_launch_description():
 
     # *********************** MoveIt!2 *********************** #   
 
-    # Determine SRDF file path
+    # *** PLANNING CONTEXT *** #
+    # Robot description, SRDF:
     if (EE == "false"):
-        srdf_file_path = "config/" + CONFIGURATION["rob"] + ".srdf"
+        robot_description_semantic_config = load_file(PACKAGE_NAME + "_moveit2", "config/" + CONFIGURATION["rob"] + ".srdf")
     else:
-        srdf_file_path = "config/" + CONFIGURATION["rob"] + CONFIGURATION["ee"] + ".srdf"
+        robot_description_semantic_config = load_file(PACKAGE_NAME + "_moveit2", "config/" + CONFIGURATION["rob"] + CONFIGURATION["ee"] + ".srdf")
+    
+    robot_description_semantic = {"robot_description_semantic": robot_description_semantic_config}
 
-    # Build MoveIt configuration using MoveItConfigsBuilder
-    moveit_config_builder = MoveItConfigsBuilder(PACKAGE_NAME + "_moveit2")
-    
-    # Configure robot description semantic (SRDF)
-    moveit_config_builder = moveit_config_builder.robot_description_semantic(
-        file_path=srdf_file_path
-    )
-    
-    # Configure kinematics
-    moveit_config_builder = moveit_config_builder.robot_description_kinematics(
-        file_path=os.path.join(
-            get_package_share_directory("ros2srrc_robots"),
-            CONFIGURATION["rob"], "config", "kinematics.yaml"
-        )
-    )
-    
-    # Configure joint limits
+    # Kinematics.yaml file:
+    kinematics_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/kinematics.yaml")
+    robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
+
+    # joint_limits.yaml file:
     if (EE == "false") or (EE == "true-NOctr"):
         joint_limits_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/joint_limits.yaml")
-        joint_limits_file = os.path.join(
-            get_package_share_directory("ros2srrc_robots"),
-            CONFIGURATION["rob"], "config", "joint_limits.yaml"
-        )
     else:
-        # Properly merge robot and end-effector joint limits
         YAML_ROB = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/joint_limits.yaml")["joint_limits"]
         YAML_EE = load_yaml("ros2srrc_endeffectors", CONFIGURATION["ee"] + "/config/joint_limits.yaml")["joint_limits"]
         joint_limits_yaml = {}
         joint_limits_yaml["joint_limits"] = YAML_ROB | YAML_EE
-        # For MoveItConfigsBuilder, we still use robot file (builder will be overridden by merged limits)
-        joint_limits_file = os.path.join(
-            get_package_share_directory("ros2srrc_robots"),
-            CONFIGURATION["rob"], "config", "joint_limits.yaml"
-        )
-
+    
     joint_limits = {'robot_description_planning': joint_limits_yaml}
-    
-    # Configure MoveItConfigsBuilder with robot joint limits file
-    moveit_config_builder = moveit_config_builder.joint_limits(
-        file_path=joint_limits_file
-    )
-    
-    # Configure planning scene monitor
-    moveit_config_builder = moveit_config_builder.planning_scene_monitor(
-        publish_robot_description=True, 
-        publish_robot_description_semantic=True,
-        publish_geometry_updates=True,
-        publish_state_updates=True,
-        publish_transforms_updates=True
-    )
-    
-    # Configure trajectory execution - using robot controller config file
-    controller_config_path = os.path.join(
-        get_package_share_directory("ros2srrc_robots"),
-        CONFIGURATION["rob"], "config", "controller_moveit2.yaml"
-    )
-    moveit_config_builder = moveit_config_builder.trajectory_execution(
-        file_path=controller_config_path
-    )
-    
-    # Configure planning pipelines
-    moveit_config_builder = moveit_config_builder.planning_pipelines(
-        pipelines=["pilz_industrial_motion_planner"]
-    )
-    
-    # Configure Pilz cartesian limits
-    moveit_config_builder = moveit_config_builder.pilz_cartesian_limits(
-        file_path=os.path.join(
-            get_package_share_directory("ros2srrc_robots"),
-            CONFIGURATION["rob"], "config", "pilz_cartesian_limits.yaml"
-        )
-    )
-    
-    # Add sensor configuration if available
-    sensors_3d_file = os.path.join(
-        get_package_share_directory(PACKAGE_NAME + "_moveit2"),
-        "config", "sensors_3d.yaml"
-    )
-    if os.path.exists(sensors_3d_file):
-        moveit_config_builder = moveit_config_builder.sensors_3d(
-            file_path=sensors_3d_file
-        )
-    
-    # Build the configuration
-    moveit_config = moveit_config_builder.to_moveit_configs()
 
-    # Load additional configurations that need merging for EE
-    kinematics_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/kinematics.yaml")
-    pilz_cartesian_limits_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/pilz_cartesian_limits.yaml")
-    
-    # Add Pilz planner configuration
+    # pilz_planning_pipeline_config.yaml file:
     pilz_planning_pipeline_config = {
         "move_group": {
             "planning_plugin": "pilz_industrial_motion_planner/CommandPlanner",
-            "request_adapters": "",
+            "request_adapters": """ """,
             "start_state_max_bounds_error": 0.1,
             "default_planner_config": "PTP",
         }
     }
+    pilz_cartesian_limits_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/pilz_cartesian_limits.yaml")
+    pilz_cartesian_limits = {'robot_description_planning': pilz_cartesian_limits_yaml}
 
-    # Add controller configuration for MoveIt
+    # MoveIt!2 Controllers:
     if (EE == "false") or (EE == "true-NOctr"):
         moveit_simple_controllers_yaml = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/controller_moveit2.yaml")
     else:
-        # Properly merge robot and end-effector controller configs
         YAML_ROB = load_yaml("ros2srrc_robots", CONFIGURATION["rob"] + "/config/controller_moveit2.yaml")
         YAML_EE = load_yaml("ros2srrc_endeffectors", CONFIGURATION["ee"] + "/config/controller_moveit2.yaml")
         for x in YAML_ROB["controller_names"]:
             YAML_EE["controller_names"].append(x)
         moveit_simple_controllers_yaml = YAML_ROB | YAML_EE
 
-    # Use the same structure as the backup file
+    # MoveIt!2 Parameters:
     moveit_controllers = {
         "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
         "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
     }
-
-    # Add trajectory execution parameters from backup
     trajectory_execution = {
         "moveit_manage_controllers": True,
         "trajectory_execution.allowed_execution_duration_scaling": 1.2,
         "trajectory_execution.allowed_goal_duration_margin": 0.5,
         "trajectory_execution.allowed_start_tolerance": 0.01,
     }
-
-    # Add planning scene monitor parameters from backup
     planning_scene_monitor_parameters = {
         "publish_planning_scene": True,
         "publish_geometry_updates": True,
         "publish_state_updates": True,
         "publish_transforms_updates": True,
     }
-
-    # CRITICAL: Add MoveGroup capabilities for gripper planning
     move_group_capabilities = {
-        "capabilities": "pilz_industrial_motion_planner/MoveGroupSequenceAction pilz_industrial_motion_planner/MoveGroupSequenceService"
+        "capabilities": """move_group/MoveGroupGetPlanningSceneService \
+            pilz_industrial_motion_planner/MoveGroupSequenceAction \
+            pilz_industrial_motion_planner/MoveGroupSequenceService"""
     }
 
-    # MoveGroup Node - keep original planning scene structure
+    # sensors_3d_yaml = os.path.join(
+    #     get_package_share_directory("machine_vision_exercise"),
+    #     "config",
+    #     "sensors_3d.yaml",
+    # )
+
+    # MoveGroup Node:
     run_move_group_node = Node(
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
         parameters=[
-            robot_description,  # Add the robot description from earlier
-            moveit_config.to_dict(),
+            robot_description,
+            robot_description_semantic,
+            kinematics_yaml,
             pilz_planning_pipeline_config,
-            joint_limits,  # This is critical - contains merged joint limits with acceleration limits for gripper
+            joint_limits,
+            pilz_cartesian_limits,
+            trajectory_execution,
             moveit_controllers,
-            {
-                "use_sim_time": True,
-                "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-                "trajectory_execution.allowed_goal_duration_margin": 0.5,
-                "trajectory_execution.allowed_start_tolerance": 0.01,
-                "moveit_manage_controllers": True,
-                "planning_pipelines": ["move_group"],
-                "default_planning_pipeline": "move_group",
-                # Octomap parameters
-                "octomap_resolution": 0.02,  # Default is 0.1, smaller = finer resolution
-                "octomap_frame": "world",
-                "max_range": 5.0,
-            },
+            planning_scene_monitor_parameters,
+            move_group_capabilities,
+            # sensors_3d_yaml,  # Add this line
+            {"use_sim_time": True},
         ],
-        arguments=["--ros-args", "--log-level", "info"],
     )
 
-    # RVIZ with all parameters from backup:
+    # RVIZ:
     rviz_base = os.path.join(get_package_share_directory(PACKAGE_NAME + "_moveit2"), "config")
     rviz_full_config = os.path.join(rviz_base + "/ur5robotiq_2f85_with_cam_moveit2.rviz")
     
@@ -458,8 +380,18 @@ def generate_launch_description():
         arguments=["-d", rviz_full_config],
         parameters=[
             robot_description,
-            moveit_config.to_dict(),
-            joint_limits,  # Add merged joint limits here too
+            robot_description_semantic,
+            kinematics_yaml,
+            
+            pilz_planning_pipeline_config,
+
+            joint_limits,
+            pilz_cartesian_limits,
+
+            trajectory_execution,
+            moveit_controllers,
+            planning_scene_monitor_parameters,
+            move_group_capabilities,
             {"use_sim_time": True},
         ]
     )
@@ -475,7 +407,7 @@ def generate_launch_description():
             package="ros2srrc_execution",
             executable="move",
             output="screen",
-            parameters=[robot_description, moveit_config.robot_description_semantic, {"robot_description_kinematics": kinematics_yaml}, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}, {"EE_PARAM": CONFIGURATION["ee"]}, {"ENV_PARAM": "gazebo"}],
+            parameters=[robot_description, robot_description_semantic, kinematics_yaml, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}, {"EE_PARAM": CONFIGURATION["ee"]}, {"ENV_PARAM": "gazebo"}],
         )
 
     else:
@@ -485,7 +417,7 @@ def generate_launch_description():
             package="ros2srrc_execution",
             executable="move",
             output="screen",
-            parameters=[robot_description, moveit_config.robot_description_semantic, {"robot_description_kinematics": kinematics_yaml}, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}, {"EE_PARAM": "none"}, {"ENV_PARAM": "gazebo"}],
+            parameters=[robot_description, robot_description_semantic, kinematics_yaml, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}, {"EE_PARAM": "none"}, {"ENV_PARAM": "gazebo"}],
         )
 
     # RobMove and RobPose:
@@ -494,14 +426,14 @@ def generate_launch_description():
         package="ros2srrc_execution",
         executable="robmove",
         output="screen",
-        parameters=[robot_description, moveit_config.robot_description_semantic, {"robot_description_kinematics": kinematics_yaml}, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}],
+        parameters=[robot_description, robot_description_semantic, kinematics_yaml, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}],
     )
     RobPoseInterface = Node(
         name="robpose",
         package="ros2srrc_execution",
         executable="robpose",
         output="screen",
-        parameters=[robot_description, moveit_config.robot_description_semantic, {"robot_description_kinematics": kinematics_yaml}, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}],
+        parameters=[robot_description, robot_description_semantic, kinematics_yaml, {"use_sim_time": True}, {"ROB_PARAM": CONFIGURATION["rob"]}],
     )
     
     # =============================================== #
@@ -585,6 +517,26 @@ def generate_launch_description():
             )
         )
     )
+
+    # LD.add_action(RegisterEventHandler(
+    #     OnProcessExit(
+    #         target_action = spawn_entity,
+    #         on_exit = [
+    #             TimerAction(
+    #                 period=3.0,
+    #                 actions=[
+    #                     Node(
+    #                         package='ros2srrc_ur5_gazebo',
+    #                         executable='model_manager.py',  # or just 'model_manager' if installed via setup.py
+    #                         name='spawn_objects',
+    #                         output='screen'
+    #                     )
+    #                 ]
+    #             )
+    #         ]
+    #     )
+    # ))
+
 
     # ***** RETURN  ***** #
     return(LD)

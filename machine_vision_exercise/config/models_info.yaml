@@ -2,50 +2,51 @@ objects:
   blue_sphere:
     shape: sphere
     size: 0.03
-    pose: {x: 0.45, y: 0.25, z: 1, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.45, y: 0.25, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: blue
 
   red_sphere:
     shape: sphere
     size: 0.03
-    pose: {x: 0.45, y: -0.25, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.45, y: -0.25, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: red
 
   green_sphere:
     shape: sphere
     size: 0.03
-    pose: {x: 0.45, y: 0.09, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.45, y: 0.09, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: green
 
   purple_sphere:
     shape: sphere
-    size: 0.04
-    pose: {x: 0.45, y: -0.09, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    size: 0.03
+    pose: {x: 0.45, y: -0.09, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: purple
 
   green_cylinder:
     shape: cylinder
     size: {radius: 0.03, height: 0.05}
-    pose: {x: 0.65, y: -0.09, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.65, y: -0.09, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: green
 
   purple_cylinder:
     shape: cylinder
     size: {radius: 0.02, height: 0.06}
-    pose: {x: 0.65, y: 0.25, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.65, y: 0.25, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: purple
 
   red_cylinder:
     shape: cylinder
     size: {radius: 0.02, height: 0.06}
-    pose: {x: 0.65, y: 0.09, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    pose: {x: 0.65, y: 0.09, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: red
 
   blue_cylinder:
     shape: cylinder
-    size: {radius: 0.04, height: 0.07}
-    pose: {x: 0.65, y: -0.25, z: 1.0, roll: 0, pitch: 0, yaw: 0}
+    size: {radius: 0.03, height: 0.07}
+    pose: {x: 0.65, y: -0.25, z: 1.01, roll: 0, pitch: 0, yaw: 0}
     color: blue
+
 
 obstacles:
   conveyor:
@@ -77,5 +78,5 @@ targets:
   target16: {x: -0.32, y: 0.18, z: 1.0}
 
 robot:
-  pose: {x: 0, y: 0, z: 1.2, roll: 0, pitch: 0, yaw: 0}
+  pose: {x: 0, y: 0, z: 1.0, roll: 0, pitch: 0, yaw: 0}
 

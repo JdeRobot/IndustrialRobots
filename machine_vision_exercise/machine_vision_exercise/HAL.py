@@ -418,7 +418,7 @@ def back_to_home():
     MoveAbsJ(_home_joints, 0.9, 1.0)
     
     # Release gripper
-    GripperSet(100, 0.5)  # 100% open (full release)
+    GripperSet(0, 0.5)  # 100% open (full release)
     
     print("Robot returned to home position")
 
@@ -436,34 +436,7 @@ def move_joint_arm(joint_0, joint_1, joint_2, joint_3, joint_4, joint_5):
     MoveAbsJ(joint_angles, 0.5, 1.0)
 
 
-def buildmap():
-    """
-    Build a map of the workspace by moving robot to scanning positions
-    This function moves the robot through key positions to get different viewpoints
-    for comprehensive workspace scanning and object detection
-    """
-    print("Starting workspace mapping procedure...")
-    
-    # Step 1: Go to home position
-    back_to_home()
-    
-    # Step 2: Move to scanning position
-    # This position provides a good overview of the workspace
-    print("Moving to scanning position...")
-    move_joint_arm(180.00, -90.0, 0.0, 0.0, -60.0, 0.0)  # Joint angles in degrees
-    
-    # Step 3: Wait for sensors to stabilize and capture data
-    time.sleep(0.5)
-    
-    # Step 4: Trigger comprehensive workspace scan
-    # detected_objects = scan_workspace()
-    
-    # Step 5: Return to home position
-    back_to_home()
-    
-    print("Workspace mapping completed")
-    
-    # return detected_objects
+
 
 def custom_scan_sequence(scan_positions):
     """

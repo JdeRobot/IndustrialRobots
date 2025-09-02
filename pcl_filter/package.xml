@@ -22,6 +22,8 @@
   <depend>cv_bridge</depend>
   <depend>libopencv-dev</depend>
   <depend>pcl_filter_msgs</depend>
+  <depend>moveit_msgs</depend>
+  
   
   <!-- Custom message dependencies -->
   <!-- <depend>your_custom_msgs</depend> -->

@@ -119,13 +119,15 @@
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.018491" />
-        <origin xyz="0.0 0.0 0.0" />
-        <inertia ixx = "0.000009" ixy = "-0.000001" ixz = "0.000000"
-            iyx = "-0.000001" iyy = "0.000001" iyz = "0.000000"
-            izx = "0.000000" izy = "0.000000" izz = "0.000010" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="5.4167e-06" ixy="0" ixz="0"
+                iyy="1.6667e-05" iyz="0"
+                izz="1.8750e-05"/>
       </inertial>
     </link>
+
+
 
     <joint name="robotiq_85_left_knuckle_joint" type="revolute">
       <parent link="robotiq_85_base_link"/>
@@ -136,6 +138,7 @@
       <dynamics damping="1.0" friction="1.0"/>
     </joint>
 
+    <!-- Robotiq: right_knuckle -->
     <!-- Robotiq: right_knuckle -->
     <link name="robotiq_85_right_knuckle_link">
       <visual>
@@ -149,19 +152,20 @@
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.018491" />
-        <origin xyz="0.0 0.0 0.0" />
-        <inertia ixx = "0.000009" ixy = "-0.000001" ixz = "0.000000"
-            iyx = "-0.000001" iyy = "0.000001" iyz = "0.000000"
-            izx = "0.000000" izy = "0.000000" izz = "0.000010" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="5.4167e-06" ixy="0" ixz="0"
+                iyy="1.6667e-05" iyz="0"
+                izz="1.8750e-05"/>
       </inertial>
     </link>
 
-    <joint name="robotiq_85_right_knuckle_joint" type="continuous">
+
+    <joint name="robotiq_85_right_knuckle_joint" type="revolute">
       <parent link="robotiq_85_base_link"/>
       <child link="robotiq_85_right_knuckle_link"/>
       <axis xyz="0 0 1"/>
-      <origin rpy="0.0 0.0 0.0" xyz="0.05490451627 -0.03060114443 0.0"/>
+      <origin rpy="0 0 0" xyz="0.05490451627 -0.03060114443 0.0"/>
       <limit lower="-0.05" upper="0.80285" velocity="0.5" effort="1000"/>
       <dynamics damping="1.0" friction="1.0"/>
     </joint>
@@ -359,6 +363,12 @@
           <box size= "0.001 0.001 0.001" />
         </geometry>
       </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
     </link>
 
     <joint name="EE_robotiq_2f85_joint" type="fixed" >
