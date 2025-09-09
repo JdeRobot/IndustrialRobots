@@ -289,7 +289,7 @@ def main():
     back_to_home()
     
     # # Step 2: Skip workspace scanning
-    perception.buildmap()
+    # perception.buildmap()
     time.sleep(1.0)
     # GripperSet(100, 1.0)
     

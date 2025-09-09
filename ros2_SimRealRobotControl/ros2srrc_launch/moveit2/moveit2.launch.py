@@ -436,6 +436,7 @@ def generate_launch_description():
                 "trajectory_execution.allowed_start_tolerance": 0.01,
                 "moveit_manage_controllers": True,
                 "planning_pipelines": ["move_group"],
+                # "default_planning_pipeline": "move_group",
                 "default_planning_pipeline": "move_group",
                 # Octomap parameters
                 "octomap_resolution": 0.02,  # Default is 0.1, smaller = finer resolution
