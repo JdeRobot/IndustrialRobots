@@ -10,14 +10,14 @@ def generate_launch_description():
     moveit_launch_file = os.path.join(
         get_package_share_directory('ros2srrc_launch'),
         'moveit2',
-        'moveit2.launch.py'
+        'machine_vision.launch.py'
     )
 
     moveit_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(moveit_launch_file),
         launch_arguments={
             'package': 'ros2srrc_ur5',
-            'config': 'ur5_3'
+            'config': 'ur5_7'
         }.items()
     )
 

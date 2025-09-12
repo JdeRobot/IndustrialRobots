@@ -107,7 +107,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.95 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.45 0.35 0.5</scale>
@@ -118,7 +118,7 @@
         <collision name='collision_0'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.95 0 -0 0</pose>
           <geometry>
             <box>
               <size>2.4 0.8 0.1</size>
@@ -173,7 +173,7 @@
       </link>
       <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>0.6 0 0.95 0 -0 1.57</pose>
+      <pose>0.335211 0.377742 0 0 -0 0</pose>
     </model>
     <model name='ground_logo_big'>
       <static>1</static>
@@ -191,8 +191,137 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>-0.5 0 0 0 -0 1.57</pose>
+      <pose>-0.163565 0.817691 0 0 -0 0</pose>
     </model>
+    <state world_name='default'>
+      <sim_time>1415 225000000</sim_time>
+      <real_time>140 714367663</real_time>
+      <wall_time>1749136275 247488251</wall_time>
+      <iterations>139808</iterations>
+      <model name='blue_sphere'>
+        <pose>0.7 0.1 1.04 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='blue_sphere'>
+          <pose>0.7 0.1 1.04 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-0 -0 0 0 -0 0</acceleration>
+          <wrench>-0 -0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='blue_target'>
+        <pose>-0.6 0.45 0.755 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.6 0.45 0.755 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='conveyor'>
+        <pose>0.6 0 0 0 -0 1.57</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.6 0 0 0 -0 1.57</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='green_cylinder'>
+        <pose>0.499971 -0.100016 1.075 0.000202 -0.000389 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='green_cylinder'>
+          <pose>0.5 -0.1 1.075 0 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='green_target'>
+        <pose>-0.6 -0.15 0.755 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.6 -0.15 0.755 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='ground_logo_big'>
+        <pose>-0.5 0 0 0 -0 1.57</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.5 0 0 0 -0 1.57</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='ground_plane'>
+        <pose>0 0 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='red_box'>
+        <pose>0.6 -0.3 1.04 0 0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='red_box'>
+          <pose>0.6 -0.3 1.04 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='red_target'>
+        <pose>-0.6 0.15 0.755 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.6 0.15 0.755 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='target_table'>
+        <pose>-0.6 0 0 0 -0 1.57</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.6 0 0 0 -0 1.57</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yellow_box'>
+        <pose>0.6 0.3 1.05 0 0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='yellow_box'>
+          <pose>0.6 0.3 1.05 0 0 0</pose>
+	  <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yellow_target'>
+        <pose>-0.6 -0.45 0.755 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.6 -0.45 0.755 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <light name='sun'>
+        <pose>0 0 10 0 -0 0</pose>
+      </light>
+    </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose>3.82249 4.74978 2.99885 -0 0.401795 -2.20437</pose>
@@ -220,7 +349,7 @@
           </inertia>
         </inertial>
         <visual name='visual'>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.73 0 -0 1.57</pose>
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
@@ -231,7 +360,7 @@
         <collision name='collision_0'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.73 0 -0 1.57</pose>
           <geometry>
             <box>
               <size>0.8 1.6 0.06</size>
@@ -286,7 +415,7 @@
       </link>
       <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>-0.6 0 0.73 0 -0 0</pose>
+      <pose>-0.877342 -1.1194 0 0 -0 0</pose>
     </model>
     <model name='yellow_target'>
       <static>1</static>
@@ -593,7 +722,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-0.6 -0.45 0.755 0 -0 0</pose>
+      <pose>-1.65226 -0.48866 0 0 -0 0</pose>
     </model>
     <model name='green_target'>
       <static>1</static>
@@ -900,7 +1029,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-0.6 -0.15 0.755 0 -0 0</pose>
+      <pose>-1.65226 -0.48866 0 0 -0 0</pose>
     </model>
     <model name='red_target'>
       <static>1</static>
@@ -1207,7 +1336,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-0.6 0.15 0.755 0 -0 0</pose>
+      <pose>-0.055993 0.310239 0 0 -0 0</pose>
     </model>
     <model name='blue_target'>
       <static>1</static>
@@ -1514,7 +1643,7 @@
           </surface>
         </collision>
       </link>
-      <pose>-0.6 0.45 0.755 0 -0 0</pose>
+      <pose>-1.18752 -1.7319 0 0 -0 0</pose>
     </model>
     <plugin name='gazebo_link_attacher' filename='libgazebo_link_attacher.so'/>
     <audio>

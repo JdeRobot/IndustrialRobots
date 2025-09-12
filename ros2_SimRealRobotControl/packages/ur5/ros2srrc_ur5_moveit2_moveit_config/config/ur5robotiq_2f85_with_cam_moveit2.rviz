@@ -527,7 +527,7 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: moveit_rviz_plugin/PlanningScene
-      Enabled: true
+      Enabled: false
       Move Group Namespace: ""
       Name: PlanningScene
       Planning Scene Topic: /monitored_planning_scene
