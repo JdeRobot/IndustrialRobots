@@ -60,7 +60,7 @@
   <!-- Include XACRO-MACRO file of the UR5: -->
   <xacro:include filename="$(find ros2srrc_robots)/ur5/urdf/ur5_macro.urdf.xacro"/>
 
-  <xacro:include filename="$(find ros2srrc_ur5_gazebo)/urdf/common_properties.xarco"/>	
+  <xacro:include filename="$(find ros2srrc_ur5_gazebo)/urdf/common_properties.xacro"/>	
 
   <xacro:include filename="$(find ros2srrc_ur5_gazebo)/urdf/cam_on_hand_params.xacro"/>	
   <xacro:include filename="$(find ros2srrc_ur5_gazebo)/urdf/cam_on_hand.xacro"/>	

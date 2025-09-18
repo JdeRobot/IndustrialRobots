@@ -106,7 +106,7 @@
           <geometry>
             <mesh>
               <scale>0.45 0.35 0.5</scale>
-              <uri>file:///home/shu/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models/conveyor/meshes/conveyor.dae</uri>
+              <uri>model://conveyor/meshes/conveyor.dae</uri>
             </mesh>
           </geometry>
         </visual>
@@ -178,7 +178,7 @@
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
-              <uri>file:///home/shu/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models/ground_logo_big/meshes/ground_logo.dae</uri>
+              <uri>model://ground_logo_big/meshes/ground_logo.dae</uri>
             </mesh>
           </geometry>
         </visual>
@@ -309,7 +309,7 @@
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
-              <uri>file:///home/shu/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models/target_table/meshes/target_table.dae</uri>
+              <uri>model://target_table/meshes/target_table.dae</uri>
             </mesh>
           </geometry>
         </visual>
@@ -398,7 +398,7 @@
           <geometry>
             <mesh>
               <scale>0.25 0.25 0.25</scale>
-              <uri>file:///home/shu/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models/target_4x4/meshes/target_4x4.dae</uri>
+              <uri>model://target_4x4/meshes/target_4x4.dae</uri>
             </mesh>
           </geometry>
         </visual>

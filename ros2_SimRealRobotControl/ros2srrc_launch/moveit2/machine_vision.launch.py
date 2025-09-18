@@ -40,6 +40,7 @@ from launch.actions import IncludeLaunchDescription, RegisterEventHandler, Timer
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
+from launch.actions import SetEnvironmentVariable
 
 # LOAD FILE:
 def load_file(package_name, file_path):
@@ -115,6 +116,7 @@ def GetEEctr(EEName):
     return(RESULT)
 
 # CHECK if CONTROLLER file exists for EE:
+
 def EEctrlEXISTS(EEName):
     
     PATH = os.path.join(get_package_share_directory('ros2srrc_endeffectors'), EEName, 'config')
@@ -122,11 +124,42 @@ def EEctrlEXISTS(EEName):
     
     RES = os.path.exists(YAML_PATH)
     return(RES)
-
+def setup_gazebo_environment():
+    """Setup Gazebo environment variables for both local and Docker"""
+    
+    # Always disable online model database (fixes hanging issue)
+    env_vars = [
+        SetEnvironmentVariable(name='GAZEBO_MODEL_DATABASE_URI', value='')
+    ]
+    
+    # Detect environment and set appropriate model path
+    if os.path.exists('/dev_ws'):
+        # Docker environment
+        model_path = '/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models'
+    else:
+        # Local environment
+        model_path = '/home/shu/dev_ws/src/IndustrialRobots/ros2_SimRealRobotControl/packages/ur5/ros2srrc_ur5_gazebo/models'
+    
+    # Get existing GAZEBO_MODEL_PATH and append our path
+    existing_path = os.environ.get('GAZEBO_MODEL_PATH', '')
+    if existing_path:
+        full_path = f"{model_path}:{existing_path}"
+    else:
+        full_path = model_path
+    
+    env_vars.append(
+        SetEnvironmentVariable(name='GAZEBO_MODEL_PATH', value=full_path)
+    )
+    
+    return env_vars
 # ========== **GENERATE LAUNCH DESCRIPTION** ========== #
 def generate_launch_description():
 
     LD = LaunchDescription()
+
+    gazebo_env_vars = setup_gazebo_environment()
+    for env_var in gazebo_env_vars:
+        LD.add_action(env_var)
     
     # === INPUT ARGUMENT: ROS 2 PACKAGE === #
     
@@ -187,7 +220,7 @@ def generate_launch_description():
     robot_gazebo = os.path.join(
         get_package_share_directory(PACKAGE_NAME + '_gazebo'),
         'worlds',
-        PACKAGE_NAME +'_machie_vision'+ '.world')
+        PACKAGE_NAME +'_machine_vision'+ '.world')
     # DECLARE Gazebo LAUNCH file:
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(get_package_share_directory('gazebo_ros'), 'launch'), '/gazebo.launch.py']),

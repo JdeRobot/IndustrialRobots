@@ -11,13 +11,13 @@
         <visual>
             <geometry>
                 <!-- <box size="0.01 0.03 0.03" /> -->
-                <mesh filename="package://ros2srrc_ur5_gazebo/meshes/kinetic.stl"/>
+                <mesh filename="file://$(find ros2srrc_ur5_gazebo)/meshes/kinetic.stl"/>
             </geometry>
             <material name="dark_grey"/>
         </visual>
         <collision>
             <geometry>
-                <mesh filename="package://ros2srrc_ur5_gazebo/meshes/kinetic.dae"/>
+                <mesh filename="file://$(find ros2srrc_ur5_gazebo)/meshes/kinetic.dae"/>
             </geometry>
         </collision>
     </link>
@@ -42,7 +42,7 @@
         <visual>
             <geometry>
                 <mesh>
-                    <uri>package://ros2srrc_ur5_gazebo/meshes/kinetic.stl</uri>
+                    <mesh filename="file://$(find ros2srrc_ur5_gazebo)/meshes/kinetic.stl"/>
                 </mesh>
             </geometry>
             <material>Gazebo/Red</material>
@@ -75,7 +75,7 @@
     <gazebo reference="hand_camera_link">
         <visual>
             <geometry>
-                <mesh filename="package://ros2srrc_ur5_gazebo/meshes/kinetic.stl"/>
+                <mesh filename="file://$(find ros2srrc_ur5_gazebo)/meshes/kinetic.stl"/>
             </geometry>
             <material>Gazebo/Red</material>
         </visual>
