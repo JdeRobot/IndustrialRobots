@@ -250,7 +250,7 @@ def main():
     # COLORS = ["red", "green", "blue", "purple"]
     # SHAPES = ["sphere", "cylinder"]
     # Pick by index:
-    color_idx = 2   # COLORS[3] -> "purple"
+    color_idx = 1   # COLORS[3] -> "purple"
     shape_idx = 1   # SHAPES[1] -> "cylinder"
     target_idx = 13
 
@@ -379,3 +379,146 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Web version full solution
+
+# import WebGUI
+# import HAL
+# import Frequency
+# import time
+
+# # Global variables for state management
+# current_state = "INIT"
+# operation_complete = False
+
+# # Configuration
+# COLORS = ["red", "green", "blue", "purple"]
+# SHAPES = ["sphere", "cylinder"]
+# TARGETS = ["target1","target2","target3","target4","target5","target6","target7","target8","target9","target10","target11","target12","target13","target14","target15","target16"]
+
+# # Per-color presets (RGB ranges)
+# COLOR_PRESETS = {
+#     "red":    dict(rmin=100, rmax=255, gmin=0,   gmax=20,  bmin=0,   bmax=20),
+#     "green":  dict(rmin=0,   rmax=20,  gmin=100, gmax=255, bmin=0,   bmax=20),
+#     "blue":   dict(rmin=0,   rmax=20,  gmin=0,   gmax=20,  bmin=100, bmax=255),
+#     "purple": dict(rmin=100, rmax=255, gmin=0,   gmax=100, bmin=10, bmax=255)
+# }
+
+# # Task configuration
+# color_idx = 1   # 0=red, 1=green, 2=blue, 3=purple
+# shape_idx = 1   # 0=sphere, 1=cylinder
+# target_idx = 13 # 1-16 for target1-target16
+
+# color_name = COLORS[color_idx]
+# shape_name = SHAPES[shape_idx]
+# target_name = TARGETS[target_idx - 1]
+# object_name = f"{color_name}_{shape_name}"
+
+# # Object and target positions
+# object_pos = None
+# target_pos = None
+# down_orientation = [0, 90, 0]
+
+# # Get perception manager
+# perception = HAL._get_perception_manager()
+
+# def reset_filters(perception_mgr):
+#     """Reset all color and shape filters"""
+#     for color in COLORS:
+#         perception_mgr.stop_color_filter(color=color)
+#         time.sleep(0.1)
+#         for shape in SHAPES:
+#             perception_mgr.stop_shape_filter(color=color, shape=shape)
+#             time.sleep(0.1)
+
+# # Enter sequential code!
+# print("Starting pick and place algorithm...")
+# print(f"Target: {object_name} -> {target_name}")
+
+# # Initialize system
+# print("Initializing system...")
+# HAL.set_home_position([0.0, -90.0, 0.0, 0.0, -90.0, 0.0])
+# HAL.back_to_home()
+# reset_filters(perception)
+
+# # Build workspace map
+# print("Building workspace map...")
+# HAL.buildmap()
+# time.sleep(1.0)
+
+# # Move to scanning position
+# print("Moving to scanning position...")
+# HAL.MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 1.0)
+
+# # Detect object
+# print(f"Detecting {object_name}...")
+# length, width, diameter, shape, color = HAL.get_object_info(object_name)
+
+# # Start filtering
+# color_param = COLOR_PRESETS[color_name].copy()
+# perception.start_color_filter(
+#     color=color_name,
+#     rmax=color_param["rmax"], rmin=color_param["rmin"],
+#     gmax=color_param["gmax"], gmin=color_param["gmin"],
+#     bmax=color_param["bmax"], bmin=color_param["bmin"],
+# )
+# time.sleep(1)
+# perception.start_shape_filter(color=color, shape=shape, radius=diameter/2)
+# time.sleep(1)
+
+# object_pos = HAL.get_object_position(object_name)
+# print(f"Object detected at: {object_pos}")
+# reset_filters(perception)
+
+# # Get target position
+# print(f"Getting target position for {target_name}...")
+# target_point = perception.get_target_position(target_name)
+# target_pos = [target_point.x, target_point.y, target_point.z]
+# print(f"Target position: {target_pos}")
+
+# # Approach object
+# print("Approaching object...")
+# above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
+# HAL.MoveJoint(above_object, down_orientation, 0.3, 1.0)
+
+# # Pick object
+# print("Picking up object...")
+# pick_position = [object_pos[0], object_pos[1], object_pos[2]]
+# HAL.MoveJoint(pick_position, down_orientation, 0.3, 1.0)
+
+# percentage = perception.gripper_setting_percentage(diameter)
+# HAL.GripperSet(percentage, 1.0)
+# HAL.attach(object_name)
+# print("Object attached!")
+
+# # Lift object
+# print("Lifting object...")
+# above_object = [object_pos[0], object_pos[1], object_pos[2] + 0.15]
+# HAL.MoveJoint(above_object, down_orientation, 0.3, 1.0)
+# HAL.MoveAbsJ([0.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 1.0)
+
+# # Approach target
+# print("Approaching target...")
+# HAL.MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 1.0)
+# above_target = [target_pos[0], target_pos[1], target_pos[2] + 0.15]
+# HAL.MoveJoint(above_target, down_orientation, 0.5, 1.0)
+
+# # Place object
+# print("Placing object...")
+# place_position = [target_pos[0], target_pos[1], target_pos[2]]
+# HAL.MoveLinear(place_position, down_orientation, 0.1, 1.0)
+# HAL.detach()
+# HAL.GripperSet(0, 1.0)
+
+# # Return home
+# print("Returning home...")
+# above_target = [target_pos[0], target_pos[1], target_pos[2] + 0.15]
+# HAL.MoveLinear(above_target, down_orientation, 0.1, 1.5)
+# HAL.MoveAbsJ([180.0, -90.0, 90.0, -90.0, -90.0, 0.0], 0.5, 1.0)
+# HAL.back_to_home()
+# print("Pick and place completed!")
+
+# while True:
+#     # Enter iterative code!
+#     Frequency.tick()

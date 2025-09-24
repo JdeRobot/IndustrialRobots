@@ -3,10 +3,22 @@
 print("HAL initializing", flush=True)
 ##############################################################################
 # JdeROBOT ROBOTICS ACADEMY (http://jderobot.github.io/RoboticsAcademy/)
-#  Integrated API for PICK and PLACE exercise with perception capabilities
-#   VERSION: 1.2
-# 	DATE: 	 September 19, 2025
+#  API PICK and PLACE exercise, including:
+#   Robot Info: get_TCP_pose, get_Joint_states
+#   Kinematics: MoveAbsJ, MoveJoint, MoveLinear, MoveSingleJ 
+#               MoveRelLinear, MoveRelReor
+#   Gripper: GripperSet, attach, dettach
+#   Perception: Color and Shape filtering capabilities
+#   
+#   VERSION: 1.1
+# 	DATE: 	 April 21, 2025
+#   AUTHOR:  Diego Martin (diego.martin.martin@gmail.com)
+# 
+# ======= Acknowledgments =======
+#  IFRA-Cranfield nice "ROS2 Sim-to-Real Robot Control" package 
+#  URL: https://github.com/IFRA-Cranfield/ros2_SimRealRobotControl
 ##############################################################################
+
 
 import sys, os, time, math
 import rclpy
