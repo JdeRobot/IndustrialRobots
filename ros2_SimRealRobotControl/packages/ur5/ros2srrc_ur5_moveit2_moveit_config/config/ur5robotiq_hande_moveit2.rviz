@@ -98,47 +98,17 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          robotiq_85_base_link:
+          robotiq_hande_base_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          robotiq_85_left_knuckle_link:
+          robotiq_hande_left_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          robotiq_85_right_knuckle_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_left_finger_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_right_finger_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_left_inner_knuckle_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_right_inner_knuckle_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_left_finger_tip_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          robotiq_85_right_finger_tip_link:
+          robotiq_hande_right_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false

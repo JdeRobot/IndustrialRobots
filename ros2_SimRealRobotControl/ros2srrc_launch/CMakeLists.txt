@@ -41,4 +41,11 @@ install(
     share/${PROJECT_NAME}
 )
 
+# Install Python scripts
+install(PROGRAMS
+  gazebo/model_manager.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 ament_package()
